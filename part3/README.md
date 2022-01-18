@@ -24,7 +24,9 @@ Package release used in this lab: v1.11.3
 
 *Due to updates in the package since the blog post's date, dependency graphs connecting **device_header** and **src** files differ slightly between the project then and now:*
 
-*insert dependancy graphs*
+![File dependency graph](device-file-dependencies.png)
+
+Note: `stm32f0xx.h` is unused by both projects for now. In `main.h`, you may include this header instead of directly including `stm32f051x8.h`
 
 ## Procedure
 Complete the project as described in Part 3:
