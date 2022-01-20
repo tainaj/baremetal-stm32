@@ -1,24 +1,26 @@
-# Part 1: Hello, ARM! & Part 2: Making it to 'Main'
-This repository is a submit box for Part 1 and Part 2 of Vivonomicon's **"Bare Metal" STM32 Programming** blog series:
+# Part 3.5: Supporting Multiple Chips
+This repository is a submit box for Part 3.5 of Vivonomicon's **"Bare Metal" STM32 Programming** blog series:
 
-https://vivonomicon.com/2018/04/02/bare-metal-stm32-programming-part-1-hello-arm/
-https://vivonomicon.com/2018/04/20/bare-metal-stm32-programming-part-2-making-it-to-main/
-
-For future reference, differences between my code and Vivonomicon's will be highlighted in the Procedure section.
+https://vivonomicon.com/2018/04/25/bare-metal-stm32-programming-part-3-5-supporting-multiple-chips/
 
 ## Hardware
-The blog uses a Nucleo development board for the STM32F031K6 chip. For this lab, I used a Discovery development board for the STM32F051R8 chip. Compare below:
+The blog uses a Nucleo development board for the STM32L031K6 chip. For this lab, I used both this board and the Discovery development board used in previous labs. Compare below:
 
-STM32 chip        | STM32F031K6T6 | STM32F051R8T6
+STM32 chip        | STM32F031K6T6 | STM32L031K6T6
 ------------------|---------------|---------------
-Core              | Cortex-M0     | Cortex-M0
-Flash memory      | 32 KB         | 64 KB
-SRAM              | 4 KB          | 8 KB
-Max frequency     | 48 MHz        | 48 MHz
-Operating voltage | 2.0 - 3.6 V   | 2.0 - 3.6 V
-Package           | LQFP32        | LQFP48
+Core              | Cortex-M0     | Cortex-M0+
+Flash memory      | 64 KB         | 32 KB
+SRAM              | 8 KB          | 8 KB
+Max frequency     | 48 MHz        | 32 MHz
+Operating voltage | 2.0 - 3.6 V   | 1.8 - 3.6 V
+Package           | LQFP48        | LQFP32
 
 ## Software
+Device header files for STM32F0 and STM32L0 can be found in STMicroelectronics' MCU Firmware Packages for ; copy and download required files from:
+
+https://github.com/STMicroelectronics/STM32CubeF0 \
+https://github.com/STMicroelectronics/STM32CubeL0
+
 The following software installed in this part have these notes:
 ### GNU Arm Embedded Toolchain
 Since Ubuntu 14.04, ARM aren't distributing their tools via PPA (via `sudo apt-get install`) anymore in the form of `gcc-arm-embedded`, a package that includes both `gcc-arm-none-eabi` and `gdb-arm-none-eabi` tools used by Vivonomicon. Only the `gcc-arm-none-eabi` package is available for Ubuntu 16.04 and above.
