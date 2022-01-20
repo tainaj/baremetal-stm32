@@ -20,8 +20,12 @@ Device header files for STM32F0 can be found in STMicroelectronics' MCU Firmware
 
 https://github.com/STMicroelectronics/STM32CubeF0
 
-To find `cmsis` and `core` files, go to `STM32CubeF0/Drivers/CMSIS/Core/Include/`\
-To find `stm32` files, go to `STM32CubeF0/Drivers/CMSIS/Device/ST/STM32F0xx/Include/`
+* To find `cmsis` and `core` files, go to
+  * `STM32CubeF0/Drivers/CMSIS/Core/Include/`
+* To find `stm32` files, go to
+  * `STM32CubeF0/Drivers/CMSIS/Device/ST/STM32F0xx/Include/`
+* To tailor your `vector_table` and `core` files for your chip, find its startup file in
+  * `STM32CubeF0/Drivers/CMSIS/Device/ST/STM32F0xx/Source/Templates/gcc/`
 
 Package release used in this lab: v1.11.3 
 
