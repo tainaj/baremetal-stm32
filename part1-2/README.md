@@ -44,6 +44,11 @@ https://github.com/stlink-org/stlink
 
 Note that some commands, like `make install`, requires the use of `sudo` to complete and will fail otherwise.
 
+### vector_table.S, core.S
+For this lab, I copied the files written for the STM32F031K6 since hardware interrupts don't matter right now. For reference, you may find the content for these files that corresponds to your chip in its associated startup file provided by STM32Cube:
+
+https://github.com/STMicroelectronics/STM32CubeF0/tree/master/Drivers/CMSIS/Device/ST/STM32F0xx/Source/Templates/gcc
+
 ## Procedure (Part 1)
 ### The toolchain, linker script, vector table, 'Hello World', compiling the code
 Install the following packages from your package repository:
