@@ -11,16 +11,25 @@ int main(void) {
     RCC->IOPENR |= RCC_IOPENR_IOPBEN | RCC_IOPENR_IOPCEN;
   #endif
 
-  // Initialize the GPIOB and GPIOC pins.
-  // B12 should be set to 'input' mode with pull-up.
+  // Initialize the GPIOB and GPIOC pins. (F0/L0)
+  // (B12/B1) should be set to 'input' mode with pull-up.
   GPIOB->MODER  &= ~(0x3 << (BUTTON_PIN*2));
   GPIOB->PUPDR  &= ~(0x3 << (BUTTON_PIN*2));
   GPIOB->PUPDR  |=  (0x1 << (BUTTON_PIN*2));
-  // C9 is connected to an LED on the 'Discovery' board.
+  // (C9/B3) is connected to an LED on the 'Discovery' board.
   //    It should be set to push-pull low-speed output.
-  GPIOC->MODER  &= ~(0x3 << (LED_PIN*2));
-  GPIOC->MODER  |=  (0x1 << (LED_PIN*2));
-  GPIOC->OTYPER &= ~(1 << LED_PIN);
+  #ifdef VVC_F0
+    GPIOC->MODER  &= ~(0x3 << (LED_PIN*2));
+    GPIOC->MODER  |=  (0x1 << (LED_PIN*2));
+    GPIOC->OTYPER &= ~(1 << LED_PIN);
+    GPIOC->PUPDR  &= ~(0x3 << (LED_PIN*2));
+  #elif  VVC_L0
+    GPIOB->MODER  &= ~(0x3 << (LED_PIN*2));
+    GPIOB->MODER  |=  (0x1 << (LED_PIN*2));
+    GPIOB->OTYPER &= ~(1 << LED_PIN);
+    GPIOB->PUPDR  &= ~(0x3 << (LED_PIN*2));
+  #endif
+
   // Keep track of whether the button is pressed.
   uint8_t button_down = 0;
   while (1) {
@@ -30,7 +39,11 @@ int main(void) {
       // The button is pressed; if it was not already
       // pressed, change the LED state.
       if (!button_down) {
-        GPIOC->ODR ^= (1 << LED_PIN);
+        #ifdef VVC_F0
+          GPIOC->ODR ^= (1 << LED_PIN);
+        #elif  VVC_L0
+          GPIOB->ODR ^= (1 << LED_PIN);
+        #endif
       }
       button_down = 1;
     }
