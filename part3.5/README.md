@@ -34,4 +34,4 @@ Do the following additions to your project folder, as descibed in Part 3.5:
 Compile a new `main.elf` file, and flash the project, as described in Part 3.5. Compare results. 
 
 ## Author's notes 
-None
+When I tried to flash the project to the Nucleo board for STM32L0 with `st-flash write main.bin 0x08000000`, it gave off errors like `Flash loader run error`. After trying to fix them, I gave up and flashed the `main.elf` file using **STM32CubeProgrammer** in Windows. This will be how I will flash to the Nucleo board in future attempts.
