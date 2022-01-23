@@ -18,7 +18,10 @@ Source code is nearly identical to my submit box for Part 4. The only exception:
 
 ## Procedure
 ### A: No hardware debouncing
-1. Construct the circuit for each GPIO input B0 and B1 as shown on the diagram:
+
+![GPIO no debounce](gpio-no-debounce.png)
+
+1. Construct the circuit for each GPIO input B0 and B1 as shown on the diagram above:
 3. Compile and run the code.
 4. Rotate the encoder in either direction. Look for brief flashes of light when rotating in the OFF direction.
 5. *If you have an oscilloscope*: Capture signals from both input pins. Look for bouncing switch (B0 is on when B1 falls)
@@ -26,6 +29,9 @@ Source code is nearly identical to my submit box for Part 4. The only exception:
 Aside from minor oscillations during each signal's fall, occasional bouncing will cause the chip to register the opposite direction the encoder is turning.
 
 ### B: Resistor-capacitor debouncing
+
+![GPIO hw debounce](gpio-hw-debounce.png)
+
 1. Construct the circuit for each GPIO input B0 and B1 as shown on the diagram:
    * Remove the diode for pin B1.
 3. Compile and run the code.
