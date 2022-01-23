@@ -18,4 +18,4 @@ Do the following additions to your project folder, as descibed in Part 4:
 Compile a new `main.elf` file, and flash the project, as described in Part 4. Compare results.
 
 ## Author's notes 
-Relatively straightforward
+Relatively straightforward. To add hardware debouncing, see my [bonus follow-up](../../bonus/hw-debounce/ "HW debounce") to this part.
