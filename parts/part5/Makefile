@@ -1,28 +1,29 @@
 TARGET = main
 
-# Default target chip. Only leave one of these un-commented.
-MCU ?= STM32F051R8
-#MCU ?= STM32L031K6
+# Default target chip.
+
+#MCU ?= STM32F051R8
+MCU ?= STM32L031K6
 
 ifeq ($(MCU), STM32F051R8)
-	MCU_FILES = STM32F051R8T6
+	MCU_FILES  = STM32F051R8T6
 	ST_MCU_DEF = STM32F051x8
-	MCU_CLASS = F0
+	MCU_CLASS  = F0
 else ifeq ($(MCU), STM32L031K6)
-	MCU_FILES = STM32L031K6T6
+	MCU_FILES  = STM32L031K6T6
 	ST_MCU_DEF = STM32L031xx
-	MCU_CLASS = L0
+	MCU_CLASS  = L0
 endif
 
 # Define the linker script location and chip architecture.
 LD_SCRIPT = $(MCU_FILES).ld
 ifeq ($(MCU_CLASS), F0)
-	MCU_SPEC  = cortex-m0
+	MCU_SPEC = cortex-m0
 else ifeq ($(MCU_CLASS), L0)
 	MCU_SPEC = cortex-m0plus
 endif
 
-# Toolchain definitions (ARM bare-metal defaults)
+# Toolchain definitions (ARM bare metal defaults)
 TOOLCHAIN = /usr
 CC = $(TOOLCHAIN)/bin/arm-none-eabi-gcc
 AS = $(TOOLCHAIN)/bin/arm-none-eabi-as
@@ -50,10 +51,8 @@ CFLAGS += -g
 CFLAGS += -fmessage-length=0
 # (Set system to ignore semihosted junk)
 CFLAGS += --specs=nosys.specs
-# (Custom flags sent to the compiler)
 CFLAGS += -D$(ST_MCU_DEF)
 CFLAGS += -DVVC_$(MCU_CLASS)
-CFLAGS += -DVVC_$(MCU)
 
 # Linker directives.
 LSCRIPT = ./ld/$(LD_SCRIPT)
@@ -63,13 +62,17 @@ LFLAGS += -Wall
 LFLAGS += --specs=nosys.specs
 LFLAGS += -nostdlib
 LFLAGS += -lgcc
+LFLAGS += -lc
 LFLAGS += -T$(LSCRIPT)
 
-AS_SRC   =  ./boot_code/$(MCU_FILES)_core.S
+AS_SRC   =  ./boot_s/$(MCU_FILES)_boot.S
 AS_SRC   += ./vector_tables/$(MCU_FILES)_vt.S
 C_SRC    =  ./src/main.c
+C_SRC    += ./src/interrupts_c.c
+C_SRC    += ./src/peripherals.c
 
 INCLUDE  =  -I./
+INCLUDE  += -I./src
 INCLUDE  += -I./device_headers
 
 OBJS  = $(AS_SRC:.S=.o)
