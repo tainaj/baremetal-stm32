@@ -21,13 +21,13 @@ Package           | LQFP32        | LQFP48
 ## Software
 The following software installed in this part have these notes:
 ### GNU Arm Embedded Toolchain
-Since Ubuntu 14.04, ARM aren't distributing their tools via PPA (via `sudo apt-get install`) anymore in the form of `gcc-arm-embedded`, a package that includes both `gcc-arm-none-eabi` and `gdb-arm-none-eabi` tools used by Vivonomicon. Only the `gcc-arm-none-eabi` package is available for Ubuntu 16.04 and above.
+Since Ubuntu 14.04, ARM aren't distributing their tools via PPA (via `sudo apt-get install`) anymore in the form of `gcc-arm-embedded`, a package that includes both `gcc-arm-none-eabi` and `gdb-arm-none-eabi` tools used by Vivonomicon. Currently, any existing packages found via PPA are outdated.
 
 See the following Stack Exchange link to learn more about installing the latest version without PPA:
 
 https://askubuntu.com/questions/1243252/how-to-install-arm-none-eabi-gdb-on-ubuntu-20-04-lts-focal-fossa/1243405#1243405
 
-For this lab, the PPA-attainable `gcc-arm-none-eabi` and `gdb-multiarch` (alternative to `gdb-arm-none-eabi`) packages were used. 
+Remember to create additional links for binaries `arm-none-eabi-objcopy` and `arm-none-eabi-objdump`.
 
 ### ST-Link
 Link to Texane's (now stlink-org) open-source STLink tool here:
@@ -42,7 +42,9 @@ To install, follow the subheaders for Linux compiling, as described in their doc
 
 https://github.com/stlink-org/stlink
 
-Note that some commands, like `make install`, requires the use of `sudo` to complete and will fail otherwise.
+Note 1: Some commands, like `make install`, requires the use of `sudo` to complete and will fail otherwise.
+
+Note 2: If you get the error **"cannot open shared object file: No such file or directory"**, try `sudo /sbin/idconfig -v`
 
 ### vector_table.S, core.S
 For this lab, I copied the files written for the STM32F031K6 since hardware interrupts don't matter right now. For reference, you may find the content for these files that corresponds to your chip in its associated startup file provided by STM32Cube:
