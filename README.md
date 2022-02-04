@@ -10,4 +10,4 @@ Each folder typically copies its content to the next folder; changes and additio
 # Author's notes 
 My submissions were written in a Linux VM I created for educative purposes. For my other hobby projects, I program the STM32 with an Eclipse IDE in my Windows host machine.
 
-Edit: Now running on two virtual Linux machines. Cloning this repository with SSH.
+Edit: Now running on two virtual Linux machines. Cloning this repository with SSH. Now trying Vivonomicon's arm-none-eabi-gdb...
