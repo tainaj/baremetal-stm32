@@ -1,6 +1,11 @@
 #include "main.h"
 
 /**
+ * Global variables.
+ */
+volatile uint8_t led_on;
+
+/**
  * Main program.
  */
 int main(void) {

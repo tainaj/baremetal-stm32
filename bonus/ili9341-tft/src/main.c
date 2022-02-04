@@ -1,6 +1,11 @@
 #include "main.h"
 
 /**
+ * Global variables.
+ */
+uint32_t core_clock_hz;
+
+/**
  * Main program.
  */
 int main(void) {

@@ -2,7 +2,7 @@ TARGET = main
 
 # Default target chip. Only leave one of these un-commented.
 #MCU ?= STM32F051R8
-#CU ?= STM32L031K6
+MCU ?= STM32L031K6
 
 ifeq ($(MCU), STM32F051R8)
 	MCU_FILES = STM32F051R8T6

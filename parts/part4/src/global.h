@@ -21,6 +21,6 @@
 //  onboard LED for 'Nucleo-32' boards.)
 #define LED_PIN        (3)
 
-volatile uint8_t led_on;
+extern volatile uint8_t led_on;
 
 #endif
