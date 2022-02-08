@@ -86,11 +86,15 @@ int main(void) {
   #endif
 
   systick_init((uint32_t) core_clock_hz);
+  timer_us_init((uint32_t) core_clock_hz);
 
   while (1) {
     // Toggle LED every 1 second (1000000 microticks)
 
-    micro_wait(3000000, 3);
+    /*for (int i=0; i<100; i++) {
+      micro_wait(10000);
+    }*/
+    milli_wait(1000);
 
     #ifdef VVC_F0
       GPIOC->ODR ^= (1 << LED_PIN);

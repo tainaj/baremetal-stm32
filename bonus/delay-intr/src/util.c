@@ -1,16 +1,12 @@
 #include "util.h"
 
 /**
- * @brief Bonus project: prove with an oscilloscope that sigfigs are being obeyed!
- * 
- */
-
-/**
- * @brief Private variables.
+ * @brief ---------------------------------------------
+ *                 Private variables.
+ * ----------------------------------------------------
  */
 
 static volatile uint32_t _millis = 0;
-static uint32_t _core_clock_mhz;
 
 /**
  * @brief Interrupt service handlers (ISR)
@@ -21,13 +17,35 @@ void SysTick_handler(void) {
 }
 
 /**
- * @brief Public functions (Delay API)
+ * @brief ---------------------------------------------
+ *                Public functions (Delay API)
+ * ----------------------------------------------------
  */
 
+/**
+ * @brief Initialize SysTick clock. Ticks milliseconds.
+ * 
+ * @param _core_clock_hz 
+ */
 void systick_init(uint32_t _core_clock_hz) {
     SysTick_Config(_core_clock_hz / 1000);
     NVIC_SetPriority(SysTick_IRQn, 0);
-    _core_clock_mhz  = _core_clock_hz / 1000000;
+}
+
+/**
+ * @brief Initialize timer. Ticks microseconds.
+ * 
+ */
+void timer_us_init(uint32_t _core_clock_hz) {
+    /* (1) Configure PSC time to 1us prescaler */
+    /* (2) Configure ARR time to 16-bit counter */
+
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    TIM2->CR1 &= ~TIM_CR1_CEN;
+    TIM2->PSC = _core_clock_hz / 1000000;   /* (1) */
+    TIM2->ARR = 0xffff;                     /* (2) */
+
+    TIM2->CR1 |= TIM_CR1_CEN;
 }
 
 uint32_t millis(void) {
@@ -37,30 +55,18 @@ uint32_t millis(void) {
 /**
  * @brief Return time in micros (mod _max_micros)
  */
-uint32_t micros(void) {
-    return (uint32_t) ((_millis & 0xffff)*1000 + 1000 - (SysTick->VAL/_core_clock_mhz));
+uint16_t micros(void) {
+    return (uint16_t)(TIM2->CNT);
 }
 
 /**
- * @brief Delay time (d) with given micro time (margin of error = 0.875d to 1d)
+ * @brief Delay time (d) with given micro time
  * 
- * @param delay   delay in us (keep below 40 seconds)
- * @param sig_fig number of sig figs required for accuracy (3000us -> 1, 3200us -> 2, 3230us -> 3 (max))
+ * @param delay   delay in us (keep below 65.535 ms)
  */
-void micro_wait(uint32_t delay, uint32_t sig_fig) {
-    int i;
-    uint32_t factor = 1;
-    
-    for (i=0; i<sig_fig; i++) {
-        factor *= 10;
-    }
-    uint32_t delay_o = delay / factor;
-    uint32_t time_start;
-    for (i=0; i<factor; i++) {
-
-        time_start = micros();
-        while (micros() - time_start < delay_o);
-    }
+void micro_wait(uint16_t delay) {
+    uint16_t time_start = micros();
+    while ((uint16_t)(micros() - time_start) < delay);
 }
 
 /**
@@ -71,5 +77,5 @@ void micro_wait(uint32_t delay, uint32_t sig_fig) {
  */
 void milli_wait(uint32_t delay) {
     uint32_t time_start = millis();
-    while (millis() - time_start < delay);
+    while ((uint32_t)(millis() - time_start) < delay);
 }
