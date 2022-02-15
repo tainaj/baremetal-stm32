@@ -29,6 +29,35 @@ void start_timer(TIM_TypeDef *TIMx, uint16_t ms) {
     RCC->APB2RSTR &= ~(RCC_APB2RSTR_TIM17RST);
   }
   #endif
+  if (TIMx == TIM21) {
+    RCC->APB2RSTR |=  (RCC_APB2RSTR_TIM21RST);
+    RCC->APB2RSTR &= ~(RCC_APB2RSTR_TIM21RST);
+  }
+  if (TIMx == TIM22) {
+    RCC->APB2RSTR |=  (RCC_APB2RSTR_TIM22RST);
+    RCC->APB2RSTR &= ~(RCC_APB2RSTR_TIM22RST);
+  }
+
+  // Bonus: AF0. GPIOA (CH1 = PA2, CH2 = PA3)
+  // Enable the GPIOB clock.
+  RCC->IOPENR   |= RCC_IOPENR_IOPAEN;
+
+  GPIOA->AFR[TIM_X_CCR_PIN_1/8] &= ~(0xF << ((TIM_X_CCR_PIN_1 % 8)*4));
+  GPIOA->AFR[TIM_X_CCR_PIN_1/8] |=  (TIM_X_CCR_AFy << ((TIM_X_CCR_PIN_1 % 8)*4));
+
+  GPIOA->MODER  &= ~(0x3 << (TIM_X_CCR_PIN_1*2));
+  GPIOA->MODER  |=  (0x2 << (TIM_X_CCR_PIN_1*2));
+  GPIOA->PUPDR  &= ~(0x3 << (TIM_X_CCR_PIN_1*2));
+  GPIOA->OTYPER &= ~(1 << TIM_X_CCR_PIN_1);
+
+  GPIOA->AFR[TIM_X_CCR_PIN_2/8] &= ~(0xF << ((TIM_X_CCR_PIN_2 % 8)*4));
+  GPIOA->AFR[TIM_X_CCR_PIN_2/8] |=  (TIM_X_CCR_AFy << ((TIM_X_CCR_PIN_2 % 8)*4));
+
+  GPIOA->MODER  &= ~(0x3 << (TIM_X_CCR_PIN_2*2));
+  GPIOA->MODER  |=  (0x2 << (TIM_X_CCR_PIN_2*2));
+  GPIOA->PUPDR  &= ~(0x3 << (TIM_X_CCR_PIN_2*2));
+  GPIOA->OTYPER &= ~(1 << TIM_X_CCR_PIN_2);
+
   // Set the timer prescaler/autoreload timing registers.
   // (These are 16-bit timers, so this won't work with >65MHz.)
   TIMx->PSC   = core_clock_hz / 1000;
@@ -37,6 +66,15 @@ void start_timer(TIM_TypeDef *TIMx, uint16_t ms) {
   TIMx->EGR  |= TIM_EGR_UG;
   // Enable the hardware interrupt.
   TIMx->DIER |= TIM_DIER_UIE;
+
+  // Bonus: CCR1, CCR2 = 333ms, 666ms
+  TIMx->CCR1  = 333-1;
+  TIMx->CCMR1 |= TIM_CCMR1_OC1M_0 | TIM_CCMR1_OC1M_1;
+  TIMx->CCER  |= TIM_CCER_CC1E;
+  TIMx->CCR2  = 666-1;
+  TIMx->CCMR1 |= TIM_CCMR1_OC2M_0 | TIM_CCMR1_OC2M_1;
+  TIMx->CCER  |= TIM_CCER_CC2E;
+
   // Enable the timer.
   TIMx->CR1  |= TIM_CR1_CEN;
 }

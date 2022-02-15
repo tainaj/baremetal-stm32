@@ -71,7 +71,9 @@ int main(void) {
     RCC->IOPENR   |= RCC_IOPENR_IOPBEN;
   #endif
   // Enable the TIM2 clock.
-  RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+  //RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+  RCC->APB2ENR |= RCC_APB2ENR_TIM21EN;
+  //RCC->APB2ENR |= RCC_APB2ENR_TIM22EN;
 
   // Setup GPIO pin B3 as push-pull output, no pupdr.
   GPIOB->MODER   &= ~(3 << (LED_PIN*2));
@@ -81,10 +83,17 @@ int main(void) {
 
   // Enable the NVIC interrupt for TIM2.
   // (Timer peripheral initialized and used elsewhere)
-  NVIC_SetPriority(TIM2_IRQn, 0x03);
-  NVIC_EnableIRQ(TIM2_IRQn);
+  //NVIC_SetPriority(TIM2_IRQn, 0x03);
+  //NVIC_EnableIRQ(TIM2_IRQn);
+  NVIC_SetPriority(TIM21_IRQn, 0x03);
+  NVIC_EnableIRQ(TIM21_IRQn);
+  //NVIC_SetPriority(TIM22_IRQn, 0x03);
+  //NVIC_EnableIRQ(TIM22_IRQn);
+  
   // Start the timer.
-  start_timer(TIM2, 1000);
+  //start_timer(TIM2, 1000);
+  start_timer(TIM21, 1000);
+  //start_timer(TIM22, 1000);
 
   // The main loop is empty; all of the program logic
   // happens in the timer interrupt.
