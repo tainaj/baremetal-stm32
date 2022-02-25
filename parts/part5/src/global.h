@@ -17,8 +17,8 @@
 extern volatile uint32_t core_clock_hz;
 
 // Bonus: CCR1, CCR2
-#define TIM_X_CCR_AFy     (0x0)
+/*#define TIM_X_CCR_AFy     (0x0)
 #define TIM_X_CCR_PIN_1   (2)
-#define TIM_X_CCR_PIN_2   (3)
+#define TIM_X_CCR_PIN_2   (3)*/
 
 #endif
