@@ -25,17 +25,24 @@
  * 1 tab == 4 spaces!
  */
 
-	RSEG    CODE:CODE(2)
-	thumb
+.syntax unified
+.cpu cortex-m0
+.fpu softvfp
+.thumb
 
-	EXTERN ulRegTest1LoopCounter
-	EXTERN ulRegTest2LoopCounter
+// Imported values (EXTERN)
+.extern ulRegTest1LoopCounter
+.extern ulRegTest2LoopCounter
 
-	PUBLIC vRegTest1Task
-	PUBLIC vRegTest2Task
+// Global values (PUBLIC)
+.global vRegTest1Task
+.global vRegTest2Task
+
+
 
 /*-----------------------------------------------------------*/
-vRegTest1Task
+.type vRegTest1Task, %function
+vRegTest1Task:
 
 	/* Fill the core registers with known values.  This is only done once. */
 	movs r1, #101
@@ -57,7 +64,7 @@ vRegTest1Task
 	mov  r12, r0
 	movs r0, #100
 
-reg1_loop
+reg1_loop:
 	/* Repeatedly check that each register still contains the value written to
 	it when the task started. */
 	cmp	r0, #100
@@ -104,15 +111,16 @@ reg1_loop
 	movs r0, #100
 	b reg1_loop
 
-reg1_error_loop
+reg1_error_loop:
 	/* If this line is hit then there was an error in a core register value.
 	The loop ensures the loop counter stops incrementing. */
 	b reg1_error_loop
 	nop
 
+.size vRegTest1Task, .-vRegTest1Task
 
-
-vRegTest2Task
+.type vRegTest2Task, %function
+vRegTest2Task:
 
 	/* Fill the core registers with known values.  This is only done once. */
 	movs r1, #1
@@ -134,7 +142,7 @@ vRegTest2Task
 	mov r12, r0
 	movs r0, #10
 
-reg2_loop
+reg2_loop:
 	/* Repeatedly check that each register still contains the value written to
 	it when the task started. */
 	cmp	r0, #10
@@ -181,10 +189,10 @@ reg2_loop
 	movs r0, #10
 	b reg2_loop
 
-reg2_error_loop
+reg2_error_loop:
 	/* If this line is hit then there was an error in a core register value.
 	The loop ensures the loop counter stops incrementing. */
 	b reg2_error_loop
 	nop
 
-	END
+.size vRegTest2Task, .-vRegTest2Task

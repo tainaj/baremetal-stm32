@@ -87,11 +87,12 @@
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0 /* Default */
 #define configSUPPORT_DYNAMIC_ALLOCATION        1 /* Default */
-#if defined(VVC_F0) || defined(VVC_L0)
+/*#if defined(VVC_F0) || defined(VVC_L0)
   #define configTOTAL_HEAP_SIZE           ( ( size_t ) ( 2 * 1024 ) )
 #else
   #define configTOTAL_HEAP_SIZE           ( ( size_t ) ( 8 * 1024 ) )
-#endif
+#endif*/
+#define configTOTAL_HEAP_SIZE           ( ( size_t ) ( 4 * 1024 ) )
 #define configAPPLICATION_ALLOCATED_HEAP        0 /* Default */
 #define configSTACK_ALLOCATION_FROM_SEPERATE_HEAP 0 /* Default */
 

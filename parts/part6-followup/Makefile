@@ -101,8 +101,10 @@ LFLAGS += -T$(LSCRIPT)
 # Source files.
 AS_SRC    = ./boot_s/$(MCU_FILES)_boot.S
 AS_SRC   += ./vector_tables/$(MCU_FILES)_vt.S
+AS_SRC   += ./src/RegTest.S
 C_SRC   = ./src/main.c
 C_SRC  += ./src/main-blinky.c
+C_SRC  += ./src/main-full.c
 C_SRC  += ./src/global.c
 C_SRC  += ./src/ParTest.c
 C_SRC    += ./freertos/Source/portable/MemMang/heap_4.c
@@ -111,12 +113,17 @@ C_SRC    += ./freertos/Source/list.c
 C_SRC    += ./freertos/Source/tasks.c
 C_SRC    += ./freertos/Source/queue.c
 C_SRC    += ./freertos/Source/timers.c
+C_SRC    += ./freertos/Demo/blocktim.c
+C_SRC    += ./freertos/Demo/countsem.c
+C_SRC    += ./freertos/Demo/dynamic.c
+C_SRC    += ./freertos/Demo/recmutex.c
 
 INCLUDE  += -I./
 INCLUDE  += -I./src
 INCLUDE  += -I./device_headers
 INCLUDE  += -I./freertos/Source/include
 INCLUDE  += -I$(FREERTOS_PORT_I)
+INCLUDE  += -I./freertos/Demo/include
 
 OBJS  = $(C_SRC:.c=.o)
 OBJS += $(AS_SRC:.S=.o)
