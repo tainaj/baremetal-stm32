@@ -8,8 +8,8 @@ static void led_task(void *args) {
 
   while (1) {
     // Toggle the LED.
-    //LED_BANK->ODR ^= (1 << LED_PIN);
-    board_led.toggle();
+    LED_BANK->ODR ^= (1 << LED_PIN);
+    //board_led.toggle();
     // Delay for a second-ish.
     vTaskDelay(pdMS_TO_TICKS(delay_ms));
   };
@@ -27,6 +27,8 @@ int main(void) {
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
     // Enable the GPIOB clock.
     RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+    // Enable the GPIOC clock.
+    RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
     // Set the LED pin to push-pull output, 2MHz.
     LED_BANK->MODER   &= ~(3 << (LED_PIN*2));
     LED_BANK->MODER   |=  (1 << (LED_PIN*2));

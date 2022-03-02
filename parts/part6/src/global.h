@@ -26,12 +26,15 @@ extern "C" {
 // ----------------------
 // Global variables and defines.
 // (Platform-specific shims)
-#ifdef VVC_F1
+#ifdef VVC_F0
+  #define LED_BANK GPIOC
+  #define LED_PIN  (9)
+#elif VVC_F1
   #define LED_BANK GPIOB
   #define LED_PIN  (12)
 #else
-  #define LED_BANK GPIOA
-  #define LED_PIN  (10)
+  #define LED_BANK GPIOB
+  #define LED_PIN  (3)
 #endif
 // (Core system clock speed; initial value depends on the chip.)
 extern volatile uint32_t core_clock_hz;
