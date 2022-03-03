@@ -6,14 +6,23 @@ https://vivonomicon.com/2018/04/22/bare-metal-stm32-programming-part-3-leds-and-
 For future reference, differences between my code and Vivonomicon's will be highlighted in the Procedure section.
 
 ## Hardware
-The blog uses a Nucleo development board for the STM32F031K6 chip. For this lab, I used a Discovery development board for the STM32F051R8 chip. See [part1-2](../part1-2) for comparison table.
+For this lab, I used the STM32F0 Discovery board; other boards are mentioned in the blog:
 
-Different GPIO pins are used for the button and LED:
+Development board | STM32F0DISCOVERY | NUCLEO-F031K6
+------------------|------------------|---------------
+Microcontroller   | STM32F051R8T6    | STM32F031K6
+Core              | Cortex-M0        | Cortex-M0
+Flash memory      | 64 KB            | 32 KB
+SRAM              | 8 KB             | 4 KB
+Max frequency     | 48 MHz           | 48 MHz
+Package           | LQFP64           | LQFP32
 
-Label        | VVC's repo | This repo
--------------|------------|---------------
-Button       | PB1         | PB12
-Embedded LED | PB3         | PC9
+Different GPIO pins are used for the button and LED, due to differences between Nucleo and Discovery boards:
+
+Development board | STM32F0DISCOVERY | NUCLEO-F031K6
+------------------|------------------|---------------
+Button            | PB12             | PB1
+Embedded LED      | PC9              | PB3
 
 ## Software
 Device header files for STM32F0 can be found in STMicroelectronics' MCU Firmware Package; copy and download required files from:
@@ -33,17 +42,17 @@ Package release used in this lab: v1.11.3
 
 ![File dependency graph](device-file-dependencies.png)
 
-Note: `stm32f0xx.h` is unused by both projects for now. In `main.h`, you may include this header instead of directly including `stm32f051x8.h`
+Note 1: `stm32f0xx.h` is unused by both projects for now. In `main.h`, you may include this header instead of directly including `stm32f051x8.h`
+
+Note 2: In future projects, refer to [this guide instead](../../import-files.md).
 
 ## Procedure
-Complete the project as described in Part 3:
-* Download/copy required **device_header** from STMicroelectronics.
-* Create new folder structure and move files to it. Update Makefile.
-* Compile project.
-* Setup hardware configuration with board, resistor, button, etc.
-* Flash project to chip with `st-flash write main.bin 0x08000000`.
+The following activity is featured in this project:
+1. Setup breadboard layout to include button.
+2. Import device header files
+3. Enable and configure General Peripheral Input/Output (GPIO) pins
 
-Test project and compare results.
+Compile the project, and flash to chip with `st-flash write main.bin 0x08000000`. Compare results.
 
 ## Author's notes 
-None
+Straightforward
