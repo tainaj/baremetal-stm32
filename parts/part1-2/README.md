@@ -7,7 +7,7 @@ https://vivonomicon.com/2018/04/20/bare-metal-stm32-programming-part-2-making-it
 For future reference, differences between my code and Vivonomicon's will be highlighted in the Procedure section.
 
 ## Hardware
-For this lab, I used both the STM32F0 Discovery board; other boards are mentioned in the blog:
+For this lab, I used the STM32F0 Discovery board; other boards are mentioned in the blog:
 
 Development board | STM32F0DISCOVERY | NUCLEO-F031K6
 ------------------|------------------|---------------
