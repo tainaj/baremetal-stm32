@@ -44,8 +44,11 @@ Note that Vivonomicon and STMicroelectronics use different naming conventions fo
 Whatever naming convention is used, use the same names when declaring/defining these ISRs in application files.
 
 ## device_headers
+![device_headers graph](device_headers_graph.png)
+*Note: Contrast between GCC compiler files used by Vivonomicon and this repository's projects*
 
 ### Description
+
 Every project's top-level application header **global.h** includes **stm32f0xx.h**,
 which links to CMSIS files required to compile the project in GCC.
 During compilation, the CMSIS files are used for the following:
@@ -82,6 +85,8 @@ To adapt the **.ld** file for other devices:
 * In MEMORY, modify the `LENGTH` value for each type of memory.
 
 ## freertos (FreeRTOS projects only)
+![freertos graph](freertos_graph.png)
+*Note: Dashed links represent includes that are either deprecated or otherwise dependent on other factors.*
 
 ### Description
 FreeRTOS is a market-leading real-time operating system (RTOS) for microcontrollers and small microprocessors.
@@ -103,7 +108,7 @@ During compilation, the **Source/** files are used for the following:
 * Interface between applcation and kernel - **FreeRTOS.h** (required)
 * Tasks<sup>1</sup> - **tasks.h** (required)
 
-1. Some projects use FreeRTOS resources found in other headers, like **queue.h**, **timers.h**, **semphr.h**; include if needed.
+1. Some projects use FreeRTOS resources found in other headers, like **queue.h**, **timers.h**, **semphr.h**; include in **global.h** if needed.
 
 During compilation, the **Demo/** files are used for the following:
 * Common demo includes<sup>1</sup> - **blocktim.h**, **countsem.h**, **recmutex.h**, **dynamic.h**, etc.
