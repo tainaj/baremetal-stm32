@@ -23,7 +23,7 @@ Get the latest MCU Firmware Package for each supported chip here:
 * [STM32F051R8T6](https://github.com/STMicroelectronics/STM32CubeF0 "STM32CubeF0")
 * [STM32F303K8T6](https://github.com/STMicroelectronics/STM32CubeF3 "STM32CubeF3")
 
-Get the latest FreeRTOS Kernel here:
+Get the latest FreeRTOS Kernel here (this lab uses version 202112.00):
 * [FreeRTOS-Kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel "FreeRTOS kernel only")
 
 Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../import-files.md) to import the non-application files for this project. Consult the **freertos** section to import FreeRTOS files.
