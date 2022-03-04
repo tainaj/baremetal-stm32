@@ -1,16 +1,25 @@
-# Bonus 2: DS3231 RTC clock
+# Bonus 1: DS3231 RTC clock
 This repository is a mini-project based on Vivonomicon's exploration of the DS3231 RTC:
 
 https://vivonomicon.com/2018/04/30/when-is-now-the-ds3231-real-time-clock/
 
 ## Hardware
-For this mini-project, I used development boards for the STM32F051R8 and STM32L031K6 chips.
+For this mini-project, I used the STM32F0 Discovery board and Nucleo L031K6 board:
+
+Development board | STM32F0DISCOVERY | NUCLEO-L031K6
+------------------|------------------|---------------
+Microcontroller   | STM32F051R8T6    | STM32L031K6T6
+Core              | Cortex-M0        | Cortex-M0+
+Flash memory      | 64 KB            | 32 KB
+SRAM              | 8 KB             | 8 KB
+Max frequency     | 48 MHz           | 32 MHz
+Package           | LQFP64           | LQFP32
 
 Components used for this project:
 * [DS3231 module](https://www.amazon.com/dp/B07Q7NZTQS?psc=1&ref=ppx_yo2_dt_b_product_details) (from Amazon)
 
 ## Software
-Firmware packages for STM32F051R8T6 and STM32L031K6T6 have been imported from the previous lab.
+Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../import-files.md) to import the non-application files for this project.
 
 ## Procedure
 The following activity is featured in this project:
@@ -117,4 +126,9 @@ After writing 'Hello, World!' to the EEPROM, reading the EEPROM should return th
 In `gdb-multiarch`, to read the value of `eeprom_str` containing the string read, you must load and let continue the program for some time before hitting `CTRL-C`, and then entering `u` several times until you reach the `main` stackframe, in which the variable `eeprom_str` is stored.
 
 ## Author's notes 
-See my future blog to see comparisions in much greater detail than I am willing to provide in this README.
+Reference material
+* [Vivonomicon](https://vivonomicon.com/2018/04/30/when-is-now-the-ds3231-real-time-clock/)
+* [Textbook, sect. 22.2](https://www.amazon.com/gp/product/0982692668/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) - Zhu, Y. (2018). *Embedded Systems with ARM Cortex-M Microcontrollers in Assembly Language and C* (3rd ed.). E-Man Press LLC.
+* Pdf (../../util/namehere)
+
+
