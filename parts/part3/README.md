@@ -44,7 +44,7 @@ Package release used in this lab: v1.11.3
 
 Note 1: `stm32f0xx.h` is unused by both projects for now. In `main.h`, you may include this header instead of directly including `stm32f051x8.h`
 
-Note 2: In future projects, refer to [this guide instead](../../import-files.md).
+Note 2: In future projects, refer to [this guide instead](../../docs/import-files.md).
 
 ## Procedure
 The following activity is featured in this project:

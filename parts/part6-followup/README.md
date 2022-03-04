@@ -1,4 +1,4 @@
-# Part 6 follow-up: Multitasking with FreeRTOS
+# Part 6 follow-up: FreeRTOS Demo Application
 This repository is a follow-up to Part 6 of Vivonomicon's **"Bare Metal" STM32 Programming** blog series:
 
 https://vivonomicon.com/2018/08/23/bare-metal-stm32-programming-part-6-multitasking-with-freertos/
@@ -19,15 +19,10 @@ Package           | LQFP64           | LQFP32
 2. Due to limits to PLL clock multiplication (see [Part 5](../part5) for clock configuration), this lab will run on 8 MHz instead.
 
 ## Software
-Get the latest MCU Firmware Package for each supported chip here:
-* [STM32F051R8T6](https://github.com/STMicroelectronics/STM32CubeF0 "STM32CubeF0")
-* [STM32F303K8T6](https://github.com/STMicroelectronics/STM32CubeF3 "STM32CubeF3")
-
-Get the latest FreeRTOS Kernel here (this lab uses version 202112.00):
-* [FreeRTOS-Kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel "FreeRTOS kernel only")
-
-Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../import-files.md) to import the non-application files for this project.
-Consult the **freertos** section to import FreeRTOS files.
+Import the code from this repository. Some key differences between this and Part 6:
+* `Makefile`: This is a purely C-based FreeRTOS project; just copy the content from the latest non-C++ Vivonomicon commit.
+* `FreeRTOSConfig.h`: Copied from Part 6, but with config settings from **STM32F0518_IAR demo** (see Procedure section)
+* `freertos/Demo/`: contains common demo application files
 
 ## Procedure
 The following activity is featured in this project:

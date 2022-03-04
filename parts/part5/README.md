@@ -16,11 +16,7 @@ Max frequency     | 48 MHz           | 32 MHz
 Package           | LQFP64           | LQFP32
 
 ## Software
-Links to STMicroelectronics' MCU Firmware Package for each supported chip are below:
-* [STM32F051R8T6](https://github.com/STMicroelectronics/STM32CubeF0 "STM32CubeF0")
-* [STM32L031K6T6](https://github.com/STMicroelectronics/STM32CubeL0 "STM32CubeL0")
-
-Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../import-files.md) to import the non-application files for this project.
+Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../docs/import-files.md) to import the non-application files for this project.
 
 ## Procedure
 The following activity is featured in this project:

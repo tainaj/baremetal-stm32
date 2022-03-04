@@ -19,7 +19,7 @@ Components used for this project:
 * [DS3231 module](https://www.amazon.com/dp/B07Q7NZTQS?psc=1&ref=ppx_yo2_dt_b_product_details) (from Amazon)
 
 ## Software
-Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../import-files.md) to import the non-application files for this project.
+Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../docs/import-files.md) to import the non-application files for this project.
 
 ## Procedure
 The following activity is featured in this project:
@@ -129,6 +129,6 @@ In `gdb-multiarch`, to read the value of `eeprom_str` containing the string read
 Reference material
 * [Vivonomicon](https://vivonomicon.com/2018/04/30/when-is-now-the-ds3231-real-time-clock/)
 * [Textbook, sect. 22.2](https://www.amazon.com/gp/product/0982692668/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) - Zhu, Y. (2018). *Embedded Systems with ARM Cortex-M Microcontrollers in Assembly Language and C* (3rd ed.). E-Man Press LLC.
-* Pdf (../../util/namehere)
+* [Pdf](../../docs/i2c-interface-ece362-engineering.purdue.edu.pdf "I2C interface")
 
 

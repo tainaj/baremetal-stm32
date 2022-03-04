@@ -1,10 +1,10 @@
-# Bonus 1: Hardware debounce
+# Part 4 follow-up: Hardware Debounce
 This repository is a follow-up mini-project for Part 4 of Vivonomicon's **"Bare Metal" STM32 Programming** blog series:
 
 https://vivonomicon.com/2018/04/28/bare-metal-stm32-programming-part-4-intro-to-hardware-interrupts/
 
 ## Hardware
-This project targets either an STM32F051R8 or STM32L031K6 chip, depending on the 'MCU' option in the Makefile.
+For this lab, I used the STM32F0 Discovery board and Nucleo L031K6 board; any board can be used.
 
 Components used for this project:
 * [Rotary encoder](https://www.adafruit.com/product/377?gclid=CjwKCAiAlrSPBhBaEiwAuLSDUHt1ilREWZn4-2v-WEEKNIWFbwG9eb-VHONJ3Z2Gz68ugEbJRtjB9hoCg-cQAvD_BwE) (from Adafruit)

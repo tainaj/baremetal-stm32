@@ -19,7 +19,7 @@ Components used for this project:
 * [ILI9341 TFT LCD display](https://www.amazon.com/gp/product/B073R7BH1B/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) (from Amazon)
 
 ## Software
-Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../import-files.md) to import the non-application files for this project.
+Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../docs/import-files.md) to import the non-application files for this project.
 
 ## Procedure
 The following activity is featured in this project:
