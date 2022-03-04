@@ -4,7 +4,7 @@ This repository is a submit box for Part 6 of Vivonomicon's **"Bare Metal" STM32
 https://vivonomicon.com/2018/08/23/bare-metal-stm32-programming-part-6-multitasking-with-freertos/
 
 ## Hardware
-For this lab, I used both the STM32F0 Discovery board and F303K8 Nucleo board; other boards are mentioned in the blog:
+For this lab, I used the STM32F0 Discovery board and F303K8 Nucleo board; other boards are mentioned in the blog:
 
 Development board | STM32F0DISCOVERY | NUCLEO-F303K8
 ------------------|------------------|---------------
@@ -26,42 +26,41 @@ Get the latest MCU Firmware Package for each supported chip here:
 Get the latest FreeRTOS Kernel here:
 * [FreeRTOS-Kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel "FreeRTOS kernel only")
 
-### Recall: how to get the files you need
-See the header file dependency graphs to identify the files needed. Using STM32F0 as an example:
-* To find `cmsis` and `core` files, go to
-  * `STM32CubeF0/Drivers/CMSIS/Core/Include/`
-* To find `stm32` files, go to
-  * `STM32CubeF0/Drivers/CMSIS/Device/ST/STM32F0xx/Include/`
-* To tailor your `vector_table` and `core` files for your chip, find its startup file in 
-  * `STM32CubeF0/Drivers/CMSIS/Device/ST/STM32F0xx/Source/Templates/gcc/`
+Consult the **boot_s and vector_tables**, **device_headers**, and **ld** sections in [this guide](../../import-files.md) to import the non-application files for this project. Consult the **freertos** section to import FreeRTOS files.
 
 ## Procedure
 The following activity is featured in this project:
-1. Setup GPIO pins to use the SPI peripheral.
-2. Initialize the SPI peripheral.
-3. Undertanding `sspi.c / `sspi.h` functions` used to send data. Compare Vivonomicon's implimentation with other authors.
-4. Connecting the display to the microcontroller.
-5. Programming the display.
+1. Understand how FreeRTOS works; it is a task scheduler.
+2. Understand the project structure.
+3. Tailor `FreeRTOSConfig.h` to this project.
+
+Compile the project, and flash to chip with `st-flash write main.bin 0x08000000`. Compare results.
 
 Additional notes for each step is listed below:
 
-### Setup GPIO pins to use the SPI peripheral
-For PA_CS and PA_RST, consider using pins PA4 and PA5 instead, since PA12 and PA15 are not available for NUCLEO_L031K6.
+### Understand how FreeRTOS works
+FreeRTOS is a task scheduler that allows an embedded device to run multiple threads while retaining the ability to react quickly to important realtime signals (taken from Vivonomicon).
 
-### Initialize the SPI peripheral
-This lab turns off the STM32's CS ('Chip Select') signal, instead using a software CS. This is a departure from my previous experience using SPI devices, in which I would use NSS.
+FreeRTOS functions this project uses (feel free to research these on your own):
+* xTaskCreate() - Creates a task for the scheduler to add, defined somewhere in the form
+`void new_task(void *args)`
+* vTaskStartScheduler() - Starts the scheduler; this should never return.
+* vTaskDelay() - Delay a task for a given number of ticks. 
 
-### Undertanding `sspi.c / `sspi.h` functions` used to send data
-This section is straightforward. The only thing of note is the importance of casting the Data Register `SPI1->DR`:
-* For 8-bit data transfers, cast it as `*(uint8_t*)&(SPIx->DR) = dat;`
-* For 16-bit data transfers, cast it as `*(uint16_t*)&(SPIx->DR) = dat;`
+### Understand the project structure.
+This part is staightforward; the only change from previous projects is the **freertos** folder and its contents.
 
-Note: So far, only F0-class devices can cast Data Register to 16-bit. It might be possible to cast L0-class devices to 16-bit, but I haven't tried it yet.
+### Tailor `FreeRTOSConfig.h` to this project
+See the [FreeRTOS configuration guide](https://www.freertos.org/a00110.html) to learn about each config option in this file.
 
-## Connecting the display to the microcontroller
-Straightforward. Remember to use PA4 and PA5 instead of PA12 and PA15 to be able to reuse on NUCLEO-L031K6!
-
-## Programming the display
-Straightforward. In `ili9341_hspi_init()`, the SPI data transfers before PWCTR1, such as the command `0xEF`, cannot be found in the ILI9341 command list. Apparently, those are commands Adafruit acquired from another source when making their module, the meanings of which are lost to time.
+Some special notes on Cortex-M specific definitions:
+* Defines for `configKERNEL_INTERRUPT_PRIORITY` and `configMAX_SYSCALL_INTERRUPT_PRIORITY` are relevant only for STM32 MCUs with a Cortex-M core that runs on ARMv7-M architecture (such as STM32F303K8).
+* For Arm Cortex-M devices, the higher the priority number, the less urgency an interrupt can have. See the [following](https://community.arm.com/arm-community-blogs/b/embedded-blog/posts/cutting-through-the-confusion-with-arm-cortex-m-interrupt-priorities "ARM community blogs") [links](https://www.freertos.org/RTOS-Cortex-M3-M4.html "FreeRTOS note for Cortex-M") for more details.
+  * Explains why lowest priority is not 0, but 2<sup>configPRIO_BITS</sup>.
+* For Arm Cortex-M devices, an interrupt's priority occupies the most significant bits in an 8-bit register.
+  * Explains why the priority value is shifted by (8 - configPRIO_BITS).
+* `configASSERT(x)` is used to test for errors during development. If a variable does not match expected values, the program disables all interrupts and enters a forever loop.
+  * For STM32 MCUs with ARMv7-M architecture, interrupts with urgency higher than `configMAX_SYSCALL_INTERRUPT_PRIORITY` are not disabled. To disable those also, replace the line `taskDISABLE_INTERRUPTS()` with `__disable_irq()`. More info [here](https://forums.freertos.org/t/how-to-disable-interrupt-on-cortex-m/10046/2 "FreeRTOS forum answer").
 
 ## Author's notes
+Take the time to read through some FreeRTOS documentation and demos to understand how a typical FreeRTOS project is structured. Alternatively, see the [follow-up](../part6-followup) to this lab.
