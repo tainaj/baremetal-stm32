@@ -16,7 +16,7 @@ Max frequency     | 48 MHz           | 72 MHz<sup>2</sup>
 Package           | LQFP64           | LQFP32
 
 1. 12 KB normal SRAM, 4 KB core coupled memory SRAM (CCMRAM)
-2. Due to limits to PLL clock multiplication (see author note), this lab will run on 8 MHz instead.
+2. Due to limits to PLL clock multiplication (see [Part 5](../part5) for clock configuration), this lab will run on 8 MHz instead.
 
 ## Software
 Get the latest MCU Firmware Package for each supported chip here:
