@@ -103,14 +103,14 @@ int main(void) {
 
   // Create a blinking LED task for the on-board LED.
   xTaskCreate(led_task, "Blink_LED", 128, (void*)&led_delay,
-              configMAX_PRIORITIES-7, NULL);
+              configMAX_PRIORITIES-3, NULL);
   // Create the OLED counting/display tasks.
   xTaskCreate(count_task, "Count_Up",
               128, (void*)&count_delay,
-              configMAX_PRIORITIES-6, NULL);
+              configMAX_PRIORITIES-2, NULL);
   xTaskCreate(oled_display_task, "OLED_Display",
               128, (void*)&display_delay,
-              configMAX_PRIORITIES-5, NULL);
+              configMAX_PRIORITIES-1, NULL);
   // Start the scheduler.
   vTaskStartScheduler();
 

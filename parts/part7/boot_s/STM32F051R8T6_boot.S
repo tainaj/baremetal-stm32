@@ -1,9 +1,14 @@
 /*
- * Minimal boot code for an STM32F103C8 / STM32F103CB.
+ * Test program to boot an STM32 chip with the absolute
+ * minimum required code for teaching about the chips.
+ *
+ * Copyright William Ransohoff, Vivonomicon, LLC, 2017
+ *
+ Open source under the MIT License
  */
 
 .syntax unified
-.cpu cortex-m3
+.cpu cortex-m0
 .fpu softvfp
 .thumb
 
@@ -11,7 +16,7 @@
 .global reset_handler
 
 /*
- * The Reset handler. Called on reset.
+ * The Reset Handler. Called on reset.
  */
 .type reset_handler, %function
 reset_handler:
@@ -51,18 +56,18 @@ reset_handler:
   LDR  r2, =_ebss
   B    reset_bss_loop
 
-  // Zero out the BSS segment.
+  // Fill the BSS segment with '0's.
   reset_bss:
     // Store a 0 and increment by a word.
     STR  r0, [r1]
     ADDS r1, r1, #4
 
   reset_bss_loop:
-    // R1 counts progress here; if we aren't
+    // We'll use R1 to count progress here; if we aren't
     // done, reset the next word and increment.
     CMP  r1, r2
     BCC  reset_bss
 
   // Branch to the 'main' method.
-  B    main
+  BL    main
 .size reset_handler, .-reset_handler

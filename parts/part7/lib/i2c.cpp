@@ -128,7 +128,8 @@ void pI2C::i2c_init(void) {
     i2c->TIMINGR &=  (0x0F000000);
     // set the given timing value.
     // TODO; default to...I think 1MHz @ 48MHz?
-    i2c->TIMINGR |=  (0x50100103);
+    i2c->TIMINGR |=  (0x50100103); // by VVC
+    //i2c->TIMINGR |=  (0x10420F13); // by F3 FRM, table 147, 100kHz @ 8MHz core
     // Enable the peripheral.
     i2c->CR1     |=  I2C_CR1_PE;
   #elif  STARm_F1
