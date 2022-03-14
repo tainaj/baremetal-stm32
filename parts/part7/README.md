@@ -47,7 +47,7 @@ These flags still permit the use of pure virtual functions, such as `read()`, `w
 To get them to work in this project:
 1. Declare them in the header file (ex. `virtual unsigned read(void) = 0;`)
 2. Do not define them in the source file (ex. `read()` commented out)
-3. Add `__cxa_pure_virtual() { while(1); }` in `main.cpp`
+3. Add `extern "C" void __cxa_pure_virtual() { while(1); }` in `main.h`
 
 ### Correction 2: Task priority values
 In `main.cpp`, in `xTaskCreate()`.
