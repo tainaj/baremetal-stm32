@@ -17,4 +17,8 @@ extern void (*_epreinit_array [])(void) __attribute__((weak));
 extern void (*_sinit_array [])(void) __attribute__((weak));
 extern void (*_einit_array [])(void) __attribute__((weak));
 
+// C++ pure virtual functions need the error handler
+// '__cxa_pure_virtual' to invoke when called.
+extern "C" void __cxa_pure_virtual() { while (1); }
+
 #endif

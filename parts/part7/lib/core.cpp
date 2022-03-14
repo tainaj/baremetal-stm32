@@ -17,13 +17,13 @@ pIO::pIO() {}
  * don't want to use a pure virtual class for several reasons.
  */
 // Read the peripheral's default data length. (Up to a word)
-unsigned pIO::read(void) { return 0; }
+//unsigned pIO::read(void) { return 0; }  // changed for pure virtual
 
 // Write the peripheral's default data width (up to a word)
-void pIO::write(unsigned dat) {}
+//void pIO::write(unsigned dat) {} // changed for pure virtual
 
 // Write multiple words to the peripheral in a stream.
-void pIO::stream(volatile void* buf, int len) {}
+//void pIO::stream(volatile void* buf, int len) {} // changed for pure virtual
 
 // Enable the peripheral clock.
 void pIO::clock_en(void) {

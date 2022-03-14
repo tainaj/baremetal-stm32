@@ -35,9 +35,9 @@ class pIO {
 public:
   pIO();
   // Common read/write methods.
-  virtual unsigned read(void);
-  virtual void     write(unsigned dat);
-  virtual void     stream(volatile void* buf, int len);
+  virtual unsigned read(void) = 0; // changed for pure virtual
+  virtual void     write(unsigned dat) = 0; // changed for pure virtual
+  virtual void     stream(volatile void* buf, int len) = 0; // changed for pure virtual
   // Common peripheral control methods.
   virtual void     clock_en(void);
   virtual void     reset(void);
