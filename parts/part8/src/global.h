@@ -21,9 +21,9 @@
 #define NUM_LEDS   (3)
 
 // Global variables.
-char     done;
-uint32_t core_clock_hz;
-int      ledi, ledb, ledt;
-uint32_t grbs[NUM_LEDS];
+extern char     done;
+extern uint32_t core_clock_hz;
+extern int      ledi, ledb, ledt;
+extern uint32_t grbs[NUM_LEDS];
 
 #endif

@@ -84,6 +84,7 @@ AS_SRC   += ./vector_tables/$(MCU_FILES)_vt.S
 C_SRC    =  ./src/main.c
 C_SRC    += ./src/util.c
 C_SRC    += ./src/tim.c
+C_SRC    += ./src/global.c
 
 INCLUDE  =  -I./
 INCLUDE  += -I./device_headers
