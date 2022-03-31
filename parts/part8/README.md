@@ -68,6 +68,8 @@ For the next stream, edit `grbs` to modify each LED's RGB value.
 ### Observe the waveform
 Read the input data pin (pink on the images). Shown below, the `0` bit has a high voltage time of about 500 ns, while the `1` bit has a time of around 750 ns (both within 150 ns tolerance).
 
+![Oscilloscope bit 0 and 1](1_0-and-1-bit.bmp)
+
 In `global.h`, I decided to modify `MPX_P0` to any number between 1 and 20. This is what I found:
 * 1 to 15 : `0` bit high time remained 500 ns
 * 16+ : `0` bit indistinguishable from `1` bit
@@ -76,11 +78,11 @@ My guess: Checking CNT in the while loop (tim.c, line 38) takes many cycles. It 
 
 ### Correction 1: White LED
 In `tim.c`, in `next_pulse()`.
-* Vivonomicon toggles `done` to 0 if `ledt` is greater than `NUM_LEDS`, which is 3.
+* Line 46: Vivonomicon toggles `done` to 0 if `ledt` is greater than `NUM_LEDS`, which is 3.
 * Before `ledt` increments to 4, `grbs[3]` is read.
 * `grbs` contains two elements, so `grbs[3]` is undefined.
 
-In my case, the fourth LED shines a bright white. This issue was resolved by changing `>` to `>=`.
+In my case, the fourth LED shines a bright white. This issue was resolved by changing `ledt > NUM_LEDS` to `ledt >= NUM_LEDS` in line 46.
 
 ## Author's notes
 As the length of this post implies, there is a better way to send the NZR data to each WS2812B LED. See my upcoming original for an example implementation. (TBA)
