@@ -43,7 +43,7 @@ inline void next_pulse(TIM_TypeDef* TIMx) {
   if (ledb > 23) {
     ledb = 0;
     ++ledt;
-    if (ledt > NUM_LEDS) { ledt = 0; done = 1; }
+    if (ledt >= NUM_LEDS) { ledt = 0; done = 1; }
   }
 }
 
