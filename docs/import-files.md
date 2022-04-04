@@ -44,7 +44,8 @@ Note that Vivonomicon and STMicroelectronics use different naming conventions fo
 Whatever naming convention is used, use the same names when declaring/defining these ISRs in application files.
 
 ## device_headers
-![device_headers graph](./util/device_headers_graph.png)
+![device_headers graph](../util/device_headers_graph.png)
+
 *Note: Contrast between GCC compiler files used by Vivonomicon and this repository's projects*
 
 ### Description
