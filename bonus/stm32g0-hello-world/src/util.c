@@ -51,6 +51,36 @@ void clock_setup(void) {
     RCC->CFGR  |=  (RCC_CFGR_SW_PLL);
     // The core clock is now 72MHz.
     core_clock_hz = 72000000;
+  #elif VVC_G0
+    // Set voltage scaling range to Range 1 (default)
+    // Note: VOS cannot be 00 or 11!
+    PWR->CR1 = 0x00000208;
+    // Set 2 wait states in flash and enable the prefetch buffer.
+    FLASH->ACR &= ~(FLASH_ACR_LATENCY);
+    FLASH->ACR |=  (FLASH_ACR_LATENCY_2 |
+                    FLASH_ACR_PRFTEN);
+    // Configure the PLLR clock to (PLLSRC * (N / M)) / R = 64MHz.
+    // Set PLLN = 0001000, PLLM = 000, PLLR = 001, and PLLSRC to 10
+    // (meaning N = 8, M = 1, R = 2, PLLSRC is HSI16 = 16MHz).
+    // Note: PLLN cannot be 0000000!
+    RCC->PLLCFGR  &= ~(RCC_PLLCFGR_PLLR | RCC_PLLCFGR_PLLM |
+                       RCC_PLLCFGR_PLLSRC);
+    RCC->PLLCFGR  |=  (RCC_PLLCFGR_PLLSRC_HSI);
+    RCC->PLLCFGR  |=  (0x0UL  << RCC_PLLCFGR_PLLM_Pos);
+    RCC->PLLCFGR  |=  (0x08UL << RCC_PLLCFGR_PLLN_Pos);
+    RCC->PLLCFGR  &= ~(0x77UL << RCC_PLLCFGR_PLLN_Pos);
+    RCC->PLLCFGR  |=  (0x1UL  << RCC_PLLCFGR_PLLR_Pos);
+    // Enable PLLRCLK.
+    RCC->PLLCFGR  |=  (RCC_PLLCFGR_PLLREN);
+    // Turn the PLL on and wait for it to be ready.
+    RCC->CR    |=  (RCC_CR_PLLON);
+    while (!(RCC->CR & RCC_CR_PLLRDY)) {};
+    // Select the PLL as the system clock source.
+    RCC->CFGR  &= ~(RCC_CFGR_SW);
+    RCC->CFGR  |=  (RCC_CFGR_SW_1);
+    while (!(RCC->CFGR & RCC_CFGR_SWS_1)) {};
+    // The system clock is now 64MHz.
+    core_clock_hz = 64000000;
   #elif VVC_L0
     // Set the Flash ACR to use 1 wait-state
     // and enable the prefetch buffer and pre-read.
