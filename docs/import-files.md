@@ -87,6 +87,7 @@ To adapt the **.ld** file for other devices:
 
 ## freertos (FreeRTOS projects only)
 ![freertos graph](../util/freertos_graph.png)
+
 *Note: Dashed links represent includes that are either deprecated or otherwise dependent on other factors.*
 
 ### Description
