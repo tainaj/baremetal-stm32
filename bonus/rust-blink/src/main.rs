@@ -1,13 +1,11 @@
 #![no_std]
 #![no_main]
 
-// #[allow(unused_extern_crates)] // NEW
-
 // pick a panicking behavior
 use panic_halt as _; // you can put a breakpoint on `rust_begin_unwind` to catch panics
-// use panic_abort as _; // requires nightly
-// use panic_itm as _; // logs messages over ITM; requires ITM support
-// use panic_semihosting as _; // logs messages to the host stderr; requires a debugger
+
+// includes
+//use cortex_m_semihosting::hprint; // uncomment this and the call to demonstrate debugging print statements (gdb only)
 use cortex_m_rt::entry;
 use stm32l0x1::{self, interrupt};
 
@@ -82,5 +80,5 @@ fn TIM2() {
         }
     }
 
-    //hprint!(".").unwrap();
+    //hprint!(".").unwrap(); // see the include for more...
 }
