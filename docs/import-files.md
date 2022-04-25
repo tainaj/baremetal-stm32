@@ -86,7 +86,8 @@ To adapt the **.ld** file for other devices:
 * In MEMORY, modify the `LENGTH` value for each type of memory.
 
 ## freertos (FreeRTOS projects only)
-![freertos graph](util/freertos_graph.png)
+![freertos graph](../util/freertos_graph.png)
+
 *Note: Dashed links represent includes that are either deprecated or otherwise dependent on other factors.*
 
 ### Description
