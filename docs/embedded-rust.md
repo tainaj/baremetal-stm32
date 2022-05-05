@@ -3,7 +3,14 @@ The **Rust programming language** is a new addition to the programming suite, an
 
 In [Vivinomicon's](https://vivonomicon.com/) post [Hello, Rust: Blinking LEDs in a New Language](https://vivonomicon.com/2019/05/23/hello-rust-blinking-leds-in-a-new-language/), most of the first step, toolchain setup, is left for the reader to complete. Which is saying something, because following the first few chapters of the provided Rust documentation is proving to be vital to understand what is really going on, and represents the wisdom of [Rustaceans](https://rustacean.net/) who went before me. This guide will be my attempt to pitch in.
 
-For an application example, see my [bonus entry for Rust](../bonus/rust-blink/ "Rust Blink").
+The target board for this guide is a NUCLEO-L031K6 development board. For an application example, see my [bonus entry for Rust](../bonus/rust-blink/ "Rust Blink").
+
+# Source material
+Consult the following resources referenced by this guide.
+* ["Embedded Rust" ebook](https://docs.rust-embedded.org/book/ "Embedded Rust ebook") - The first two chapters cover intallation and a step-by-step guide to setup your work environment to compile a Rust project.
+* ["Discovery" ebook](https://docs.rust-embedded.org/discovery/ "Discovery ebook") - Written after Vivonomicon's "Rust Blink" post. Beginner-friendly examples of embedded Rust programs, which expand the concepts demonstrated here.
+* ["Rust" ebook](https://doc.rust-lang.org/book/ "Rust ebook") - An introductory book about Rust, a programming language that gives you the option to control low-level details (such as memory usage) without all the hassle traditionally associated with such control.
+* [Docs.rs](https://docs.rs/) - Look up entries for "svd2rust". Note that `stm32l0x1` here (a submodule of crate `stm32l0`) is the **crates.io** version; see **Key differences** below for a walkthrough between the differences between that module and the local library crate used in this project.
 
 # Initial installation
 For projects programmed with Embedded Rust, non-application files present in other posts, such as those from **boot_s** **vector_tables**, **device_headers**, and **ld** sections, will not be imported.
