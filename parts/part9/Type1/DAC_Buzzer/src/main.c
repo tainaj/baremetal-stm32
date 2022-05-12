@@ -2,7 +2,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 // Vendor-provided device header file.
-#include "stm32f3xx.h"
+#ifdef VVC_F0
+  #include "stm32f0xx.h"
+#elif VVC_F3
+  #include "stm32f3xx.h"
+#endif
 
 // 32-sample sine wave.
 #define _AMP(x) ( x / 8 )
@@ -34,8 +38,13 @@ int main(void) {
   // Enable peripherals: GPIOA, DMA, DAC, TIM6, SYSCFG.
   RCC->AHBENR   |= ( RCC_AHBENR_GPIOAEN |
                      RCC_AHBENR_DMA1EN );
-  RCC->APB1ENR  |= ( RCC_APB1ENR_DAC1EN |
-                     RCC_APB1ENR_TIM6EN );
+  #ifdef VVC_F0
+    RCC->APB1ENR  |= ( RCC_APB1ENR_DACEN |
+                       RCC_APB1ENR_TIM6EN );
+  #elif VVC_F3
+    RCC->APB1ENR  |= ( RCC_APB1ENR_DAC1EN |
+                       RCC_APB1ENR_TIM6EN );
+  #endif
   RCC->APB2ENR  |= RCC_APB2ENR_SYSCFGEN;
 
   // Pin A4: analog mode. (PA4 = DAC1, Channel 1)
@@ -45,7 +54,9 @@ int main(void) {
   // Set the 'TIM6/DAC1 remap' bit in SYSCFG_CFGR1,
   // so that DAC1_Ch1 maps to DMA1_Ch3 instead of DMA2_Ch3.
   // (Not all STM32F303 chips have a DMA2 peripheral)
-  SYSCFG->CFGR1 |=  ( SYSCFG_CFGR1_TIM6DAC1Ch1_DMA_RMP );
+  #ifdef VVC_F3
+    SYSCFG->CFGR1 |=  ( SYSCFG_CFGR1_TIM6DAC1Ch1_DMA_RMP );
+  #endif
 
   // DMA configuration (DMA1, channel 3).
   // CCR register:

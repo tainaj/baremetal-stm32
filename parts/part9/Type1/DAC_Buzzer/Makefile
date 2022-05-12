@@ -1,15 +1,26 @@
 TARGET = main
 
 # Default target chip.
-MCU ?= STM32F303K8
+MCU ?= STM32F051R8
+#MCU ?= STM32F303K8
 
-MCU_FILES = STM32F303K8T6
-ST_MCU_DEF = STM32F303x8
-MCU_CLASS = F3
+ifeq ($(MCU), STM32F051R8)
+	MCU_FILES  = STM32F051R8T6
+	ST_MCU_DEF = STM32F051x8
+	MCU_CLASS  = F0
+else ifeq ($(MCU), STM32F303K8)
+	MCU_FILES  = STM32F303K8T6
+	ST_MCU_DEF = STM32F303x8
+	MCU_CLASS  = F3
+endif
 
 # Define the linker script location and chip architecture.
 LD_SCRIPT = $(MCU_FILES).ld
-MCU_SPEC = cortex-m4
+ifeq ($(MCU_CLASS), F0)
+	MCU_SPEC = cortex-m0
+else ifeq ($(MCU_CLASS), F3)
+	MCU_SPEC = cortex-m4
+endif
 
 # Toolchain definitions (ARM bare metal defaults)
 TOOLCHAIN = /usr
