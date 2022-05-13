@@ -1,10 +1,10 @@
 TARGET = main
 
 # Default target chip.
-MCU ?= STM32G071GB
+MCU ?= STM32G031J6
 
-MCU_FILES = STM32G071GBU6
-ST_MCU_DEF = STM32G071xx
+MCU_FILES = STM32G031J6T6
+ST_MCU_DEF = STM32G031xx
 MCU_CLASS = G0
 
 # Define the linker script location and chip architecture.
