@@ -4,9 +4,14 @@
 // Vendor-provided device header file.
 #include "stm32g0xx.h"
 
+// Configurable NZR settings
+#define NZR_BIT_0       0x07
+#define NZR_BIT_1       0x1F
+#define NZR_RST_PULSE   128
+
 // Array of LED colors. G/R/B/G/R/B/...
-#define NUM_LEDS  ( 90 )
-#define LED_BYTES ( ( NUM_LEDS * 3 * 8 ) + 64 )
+#define NUM_LEDS  ( 3 )
+#define LED_BYTES ( ( NUM_LEDS * 3 * 8 ) + NZR_RST_PULSE )
 uint8_t COLORS[ LED_BYTES ];
 
 // Global variable to hold the core clock speed in Hertz.
@@ -28,16 +33,16 @@ void set_color( size_t led_index, uint32_t col ) {
   uint8_t g = ( col >> 16 ) & 0xFF;
   uint8_t b = ( col ) & 0xFF;
   for ( size_t i = 0; i < 8; ++i ) {
-    if ( g & ( 1 << ( 7 - i ) ) ) { COLORS[ i + led_base ] = 0xFC; }
-    else { COLORS[ i + led_base ] = 0xC0; }
+    if ( g & ( 1 << ( 7 - i ) ) ) { COLORS[ i + led_base ] = NZR_BIT_1; }
+    else { COLORS[ i + led_base ] = NZR_BIT_0; }
   }
   for ( size_t i = 0; i < 8; ++i ) {
-    if ( r & ( 1 << ( 7 - i ) ) ) { COLORS[ i + led_base + 8 ] = 0xFC; }
-    else { COLORS[ i + led_base + 8 ] = 0xC0; }
+    if ( r & ( 1 << ( 7 - i ) ) ) { COLORS[ i + led_base + 8 ] = NZR_BIT_1; }
+    else { COLORS[ i + led_base + 8 ] = NZR_BIT_0; }
   }
   for ( size_t i = 0; i < 8; ++i ) {
-    if ( b & ( 1 << ( 7 - i ) ) ) { COLORS[ i + led_base + 16 ] = 0xFC; }
-    else { COLORS[ i + led_base + 16 ] = 0xC0; }
+    if ( b & ( 1 << ( 7 - i ) ) ) { COLORS[ i + led_base + 16 ] = NZR_BIT_1; }
+    else { COLORS[ i + led_base + 16 ] = NZR_BIT_0; }
   }
 }
 
@@ -45,7 +50,7 @@ void set_color( size_t led_index, uint32_t col ) {
 uint8_t get_led_r( size_t led_num ) {
   uint8_t r = 0x00;
   for ( size_t i = 0; i < 8; ++i ) {
-    if ( COLORS[ ( led_num * 24 ) + 8 + i ] != 0xC0 ) {
+    if ( COLORS[ ( led_num * 24 ) + 8 + i ] != NZR_BIT_0 ) {
       r = r | ( 1 << ( 7 - i ) );
     }
   }
@@ -56,7 +61,7 @@ uint8_t get_led_r( size_t led_num ) {
 uint8_t get_led_g( size_t led_num ) {
   uint8_t g = 0x00;
   for ( size_t i = 0; i < 8; ++i ) {
-    if ( COLORS[ ( led_num * 24 ) + i ] != 0xC0 ) {
+    if ( COLORS[ ( led_num * 24 ) + i ] != NZR_BIT_0 ) {
       g = g | ( 1 << ( 7 - i ) );
     }
   }
@@ -67,7 +72,7 @@ uint8_t get_led_g( size_t led_num ) {
 uint8_t get_led_b( size_t led_num ) {
   uint8_t b = 0x00;
   for ( size_t i = 0; i < 8; ++i ) {
-    if ( COLORS[ ( led_num * 24 ) + 16 + i ] != 0xC0 ) {
+    if ( COLORS[ ( led_num * 24 ) + 16 + i ] != NZR_BIT_0 ) {
       b = b | ( 1 << ( 7 - i ) );
     }
   }
@@ -77,7 +82,7 @@ uint8_t get_led_b( size_t led_num ) {
 // Max brightness (out of a possible 255)
 #define MAX_B ( 63 )
 // How quickly to increment/decrement the colors.
-#define B_INC ( 1 )
+#define B_INC ( 20 )
 // Cycle the array of colors through a rainbow.
 // Red -> Purple -> Blue -> Teal -> Green -> Yellow -> Red
 // - If red > 0 and < max, if blue is 0, add red.
@@ -111,10 +116,10 @@ void rainbow( void ) {
 int main(void) {
   // Set initial colors to 'off'.
   for ( size_t i = 0; i < NUM_LEDS; ++i ) {
-    set_color( i, get_rgb_color( 0x00, 0x00, 0x00 ) );
+    set_color( i, get_rgb_color( 0x00, 0x3F, 0x00 ) );
   }
   // Set the latching period to all 0s.
-  for ( size_t i = LED_BYTES - 64; i < LED_BYTES; ++i ) {
+  for ( size_t i = LED_BYTES - NZR_RST_PULSE; i < LED_BYTES; ++i ) {
     COLORS[ i ] = 0x00;
   }
   // Enable peripherals: GPIOB, DMA, SPI1.
@@ -156,7 +161,7 @@ int main(void) {
   // - Memory-to-peripheral
   // - Circular mode enabled.
   // - Increment memory ptr, don't increment periph ptr.
-  // - -bit data size for both source and destination.
+  // - 8-bit data size for both source and destination. (change to 16-bit for dest)
   // - High priority.
   DMA1_Channel1->CCR &= ~( DMA_CCR_MEM2MEM |
                            DMA_CCR_PL |
@@ -167,7 +172,8 @@ int main(void) {
   DMA1_Channel1->CCR |=  ( ( 0x2 << DMA_CCR_PL_Pos ) |
                            DMA_CCR_MINC |
                            DMA_CCR_CIRC |
-                           DMA_CCR_DIR );
+                           DMA_CCR_DIR  |
+                           DMA_CCR_PSIZE_0);
   // Route DMA channel 0 to SPI1 transmit.
   DMAMUX1_Channel0->CCR &= ~( DMAMUX_CxCR_DMAREQ_ID );
   DMAMUX1_Channel0->CCR |=  ( 17 << DMAMUX_CxCR_DMAREQ_ID_Pos );
@@ -182,8 +188,8 @@ int main(void) {
   // SPI1 configuration:
   // - Clock phase/polarity: 1/1
   // - Assert internal CS signal (software CS pin control)
-  // - MSB-first
-  // - 8-bit frames
+  // - MSB-first (change to LSB-first)
+  // - 8-bit frames (change to 16-bit)
   // - Baud rate prescaler of 8 (for a 6MHz bit-clock)
   // - TX DMA requests enabled.
   SPI1->CR1 &= ~( SPI_CR1_LSBFIRST |
@@ -193,9 +199,10 @@ int main(void) {
                   0x2 << SPI_CR1_BR_Pos |
                   SPI_CR1_MSTR |
                   SPI_CR1_CPOL |
-                  SPI_CR1_CPHA );
+                  SPI_CR1_CPHA |
+                  SPI_CR1_LSBFIRST );
   SPI1->CR2 &= ~( SPI_CR2_DS );
-  SPI1->CR2 |=  ( 0x7 << SPI_CR2_DS_Pos |
+  SPI1->CR2 |=  ( 0xF << SPI_CR2_DS_Pos |
                   SPI_CR2_TXDMAEN );
   // Enable the SPI peripheral.
   SPI1->CR1 |=  ( SPI_CR1_SPE );
@@ -205,7 +212,7 @@ int main(void) {
 
   // Done; now just cycle between colors.
   while (1) {
-    rainbow();
+    //rainbow();
     delay_cycles( 10000 );
   }
 }
