@@ -2,7 +2,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 // Vendor-provided device header file.
-#include "stm32g0xx.h"
+#ifdef VVC_F0
+  #include "stm32f0xx.h"
+#elif VVC_F3
+  #include "stm32f3xx.h"
+#elif VVC_L0
+  #include "stm32l0xx.h"
+#endif
 
 // Configurable NZR settings
 #define NZR_BIT_0       0x07

@@ -1,15 +1,33 @@
 TARGET = main
 
 # Default target chip.
-MCU ?= STM32G031J6
+MCU ?= STM32F051R8
+#MCU ?= STM32F303K8
+#MCU ?= STM32L031K6
 
-MCU_FILES = STM32G031J6T6
-ST_MCU_DEF = STM32G031xx
-MCU_CLASS = G0
+ifeq ($(MCU), STM32F051R8)
+	MCU_FILES  = STM32F051R8T6
+	ST_MCU_DEF = STM32F051x8
+	MCU_CLASS  = F0
+else ifeq ($(MCU), STM32F303K8)
+	MCU_FILES  = STM32F303K8T6
+	ST_MCU_DEF = STM32F303x8
+	MCU_CLASS  = F3
+else ifeq ($(MCU), STM32L031K6)
+	MCU_FILES  = STM32L031K6T6
+	ST_MCU_DEF = STM32L031xx
+	MCU_CLASS  = F3
+endif
 
 # Define the linker script location and chip architecture.
 LD_SCRIPT = $(MCU_FILES).ld
-MCU_SPEC = cortex-m0plus
+ifeq ($(MCU_CLASS), F0)
+	MCU_SPEC = cortex-m0
+else ifeq ($(MCU_CLASS), F3)
+	MCU_SPEC = cortex-m4
+else ifeq ($(MCU_CLASS), L0)
+	MCU_SPEC = cortex-m0plus
+endif
 
 # Toolchain definitions (ARM bare metal defaults)
 TOOLCHAIN = /usr
@@ -33,7 +51,7 @@ ASFLAGS += -DVVC_$(MCU_CLASS)
 # C compilation directives
 CFLAGS += -mcpu=$(MCU_SPEC)
 CFLAGS += -mthumb
-ifeq ($(MCU_CLASS), G4)
+ifeq ($(MCU_CLASS), F3)
 	CFLAGS += -mhard-float
 	CFLAGS += -mfloat-abi=hard
 	CFLAGS += -mfpu=fpv4-sp-d16
@@ -54,7 +72,7 @@ CFLAGS += -DVVC_$(MCU_CLASS)
 LSCRIPT = ./ld/$(LD_SCRIPT)
 LFLAGS += -mcpu=$(MCU_SPEC)
 LFLAGS += -mthumb
-ifeq ($(MCU_CLASS), G4)
+ifeq ($(MCU_CLASS), F3)
 	LFLAGS += -mhard-float
 	LFLAGS += -mfloat-abi=hard
 	LFLAGS += -mfpu=fpv4-sp-d16
