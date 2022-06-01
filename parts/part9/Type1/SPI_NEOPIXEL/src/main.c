@@ -292,7 +292,7 @@ int main(void)
     core_clock_hz = 32000000;
   #endif
 
-  // Setup pin: just one for this demo, PB5 is AF#0 (SPI1 SDO) (AF#5 for F3).
+  // Setup pin: PB5 is AF#0 (SPI1 SDO), or AF#5 for F3.
   #ifdef VVC_F0
     GPIOB->MODER &=  ~(0x3 << (5 * 2));
     GPIOB->MODER |=   (0x2 << (5 * 2));
@@ -315,27 +315,24 @@ int main(void)
   // - Increment memory ptr, don't increment periph ptr.
   // - 8-bit data size for both source and destination. (change to 16-bit for dest)
   // - High priority.
-  DMA1_Channel1->CCR &= ~(DMA_CCR_MEM2MEM |
+  DMA1_Channel3->CCR &= ~(DMA_CCR_MEM2MEM |
                           DMA_CCR_PL |
                           DMA_CCR_MSIZE |
                           DMA_CCR_PSIZE |
                           DMA_CCR_PINC |
                           DMA_CCR_EN);
-  DMA1_Channel1->CCR |= ((0x2 << DMA_CCR_PL_Pos) |
+  DMA1_Channel3->CCR |= ((0x2 << DMA_CCR_PL_Pos) |
                          DMA_CCR_MINC |
                          DMA_CCR_CIRC |
                          DMA_CCR_DIR |
                          DMA_CCR_PSIZE_0);
-  // Route DMA channel 0 to SPI1 transmit.
-  DMAMUX1_Channel0->CCR &= ~(DMAMUX_CxCR_DMAREQ_ID);
-  DMAMUX1_Channel0->CCR |= (17 << DMAMUX_CxCR_DMAREQ_ID_Pos);
   // Set DMA source and destination addresses.
   // Source: Address of the framebuffer.
-  DMA1_Channel1->CMAR = (uint32_t)&COLORS;
+  DMA1_Channel3->CMAR = (uint32_t)&COLORS;
   // Destination: SPI1 data register.
-  DMA1_Channel1->CPAR = (uint32_t) & (SPI1->DR);
+  DMA1_Channel3->CPAR = (uint32_t) & (SPI1->DR);
   // Set DMA data transfer length (framebuffer length).
-  DMA1_Channel1->CNDTR = (uint16_t)LED_BYTES;
+  DMA1_Channel3->CNDTR = (uint16_t)LED_BYTES;
 
   // SPI1 configuration:
   // - Clock phase/polarity: 1/1
@@ -360,7 +357,7 @@ int main(void)
   SPI1->CR1 |= (SPI_CR1_SPE);
 
   // Enable DMA1 Channel 1 to start sending colors.
-  DMA1_Channel1->CCR |= (DMA_CCR_EN);
+  DMA1_Channel3->CCR |= (DMA_CCR_EN);
 
   // Done; now just cycle between colors.
   while (1)
