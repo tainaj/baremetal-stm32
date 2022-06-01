@@ -13,7 +13,7 @@
 // Configurable NZR settings
 #define NZR_BIT_0 0x07
 #define NZR_BIT_1 0x1F
-#define NZR_RST_PULSE 128
+#define NZR_RST_PULSE 82
 
 // Array of LED colors. G/R/B/G/R/B/...
 #define NUM_LEDS (3)
