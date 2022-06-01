@@ -238,7 +238,7 @@ int main(void)
     {
     };
     // The system clock is now 48MHz.
-    core_clock_hz = 48000000;
+    SystemCoreClock = 48000000;
   #elif VVC_F3
     // Set 1 wait-state and enable the prefetch buffer.
     FLASH->ACR |= (FLASH_ACR_LATENCY_0 |
@@ -262,7 +262,7 @@ int main(void)
     {
     };
     // The system clock is now 48MHz.
-    core_clock_hz = 48000000;
+    SystemCoreClock = 48000000;
   #elif VVC_L0
     // Set the Flash ACR to use 1 wait-state
     // and enable the prefetch buffer and pre-read.
@@ -289,7 +289,7 @@ int main(void)
     RCC->CFGR  |=  (RCC_CFGR_SW_PLL);
     while (!(RCC->CFGR & RCC_CFGR_SWS_PLL)) {};
     // Set the global clock speed variable.
-    core_clock_hz = 32000000;
+    SystemCoreClock = 32000000;
   #endif
 
   // Setup pin: PB5 is AF#0 (SPI1 SDO), or AF#5 for F3.
@@ -328,18 +328,18 @@ int main(void)
                          DMA_CCR_PSIZE_0);
   // Set DMA source and destination addresses.
   // Source: Address of the framebuffer.
-  DMA1_Channel3->CMAR = (uint32_t)&COLORS;
+  DMA1_Channel3->CMAR = ( uint32_t )&COLORS;
   // Destination: SPI1 data register.
-  DMA1_Channel3->CPAR = (uint32_t) & (SPI1->DR);
+  DMA1_Channel3->CPAR = ( uint32_t ) & (SPI1->DR);
   // Set DMA data transfer length (framebuffer length).
-  DMA1_Channel3->CNDTR = (uint16_t)LED_BYTES;
+  DMA1_Channel3->CNDTR = ( uint16_t )LED_BYTES;
 
   // SPI1 configuration:
   // - Clock phase/polarity: 1/1
   // - Assert internal CS signal (software CS pin control)
   // - MSB-first (change to LSB-first)
   // - 8-bit frames (change to 16-bit)
-  // - Baud rate prescaler of 8 (for a 6MHz bit-clock)
+  // - Baud rate prescaler of 8 (for a 6MHz bit-clock, 4MHz for L0)
   // - TX DMA requests enabled.
   SPI1->CR1 &= ~(SPI_CR1_LSBFIRST |
                  SPI_CR1_BR);
@@ -350,9 +350,17 @@ int main(void)
                 SPI_CR1_CPOL |
                 SPI_CR1_CPHA |
                 SPI_CR1_LSBFIRST);
-  SPI1->CR2 &= ~(SPI_CR2_DS);
-  SPI1->CR2 |= (0xF << SPI_CR2_DS_Pos |
-                SPI_CR2_TXDMAEN);
+  SPI1->CR2 |=  (SPI_CR2_TXDMAEN);
+  #ifdef VVC_F0
+    SPI1->CR2 &= ~(SPI_CR2_DS);
+    SPI1->CR2 |= (0xF << SPI_CR2_DS_Pos);
+  #elif VVC_F3
+    SPI1->CR2 &= ~(SPI_CR2_DS);
+    SPI1->CR2 |= (0xF << SPI_CR2_DS_Pos);
+  #elif VVC_L0
+    SPI1->CR1 |= (SPI_CR1_DFF);
+  #endif
+
   // Enable the SPI peripheral.
   SPI1->CR1 |= (SPI_CR1_SPE);
 

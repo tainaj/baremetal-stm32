@@ -16,7 +16,7 @@ else ifeq ($(MCU), STM32F303K8)
 else ifeq ($(MCU), STM32L031K6)
 	MCU_FILES  = STM32L031K6T6
 	ST_MCU_DEF = STM32L031xx
-	MCU_CLASS  = F3
+	MCU_CLASS  = L0
 endif
 
 # Define the linker script location and chip architecture.
