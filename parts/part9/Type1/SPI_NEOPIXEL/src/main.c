@@ -11,8 +11,8 @@
 #endif
 
 // Configurable NZR settings
-#define NZR_BIT_0 0x07
-#define NZR_BIT_1 0x1F
+#define NZR_BIT_0 0xE0
+#define NZR_BIT_1 0xF8
 #define NZR_RST_PULSE 192
 
 // Array of LED colors. G/R/B/G/R/B/...
@@ -336,7 +336,7 @@ int main(void)
   // SPI1 configuration:
   // - Clock phase/polarity: 1/1
   // - Assert internal CS signal (software CS pin control)
-  // - MSB-first (change to LSB-first)
+  // - MSB-first
   // - 8-bit frames
   // - Baud rate prescaler of 8 (for a 6MHz bit-clock, 4MHz for L0)
   // - TX DMA requests enabled.
@@ -347,8 +347,7 @@ int main(void)
                 0x2 << SPI_CR1_BR_Pos |
                 SPI_CR1_MSTR |
                 SPI_CR1_CPOL |
-                SPI_CR1_CPHA |
-                SPI_CR1_LSBFIRST);
+                SPI_CR1_CPHA);
   SPI1->CR2 |=  (SPI_CR2_TXDMAEN);
   #ifdef VVC_F0
     SPI1->CR2 &= ~(SPI_CR2_DS);
