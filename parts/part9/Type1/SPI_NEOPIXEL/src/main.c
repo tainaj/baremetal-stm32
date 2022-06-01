@@ -13,7 +13,7 @@
 // Configurable NZR settings
 #define NZR_BIT_0 0x07
 #define NZR_BIT_1 0x1F
-#define NZR_RST_PULSE 82
+#define NZR_RST_PULSE 192
 
 // Array of LED colors. G/R/B/G/R/B/...
 #define NUM_LEDS (3)
@@ -313,7 +313,7 @@ int main(void)
   // - Memory-to-peripheral
   // - Circular mode enabled.
   // - Increment memory ptr, don't increment periph ptr.
-  // - 8-bit data size for both source and destination. (change to 16-bit for dest)
+  // - 8-bit data size for both source and destination.
   // - High priority.
   DMA1_Channel3->CCR &= ~(DMA_CCR_MEM2MEM |
                           DMA_CCR_PL |
@@ -324,8 +324,7 @@ int main(void)
   DMA1_Channel3->CCR |= ((0x2 << DMA_CCR_PL_Pos) |
                          DMA_CCR_MINC |
                          DMA_CCR_CIRC |
-                         DMA_CCR_DIR |
-                         DMA_CCR_PSIZE_0);
+                         DMA_CCR_DIR);
   // Set DMA source and destination addresses.
   // Source: Address of the framebuffer.
   DMA1_Channel3->CMAR = ( uint32_t )&COLORS;
@@ -338,7 +337,7 @@ int main(void)
   // - Clock phase/polarity: 1/1
   // - Assert internal CS signal (software CS pin control)
   // - MSB-first (change to LSB-first)
-  // - 8-bit frames (change to 16-bit)
+  // - 8-bit frames
   // - Baud rate prescaler of 8 (for a 6MHz bit-clock, 4MHz for L0)
   // - TX DMA requests enabled.
   SPI1->CR1 &= ~(SPI_CR1_LSBFIRST |
@@ -353,12 +352,12 @@ int main(void)
   SPI1->CR2 |=  (SPI_CR2_TXDMAEN);
   #ifdef VVC_F0
     SPI1->CR2 &= ~(SPI_CR2_DS);
-    SPI1->CR2 |= (0xF << SPI_CR2_DS_Pos);
+    SPI1->CR2 |= (0x7 << SPI_CR2_DS_Pos);
   #elif VVC_F3
     SPI1->CR2 &= ~(SPI_CR2_DS);
-    SPI1->CR2 |= (0xF << SPI_CR2_DS_Pos);
+    SPI1->CR2 |= (0x7 << SPI_CR2_DS_Pos);
   #elif VVC_L0
-    SPI1->CR1 |= (SPI_CR1_DFF);
+    SPI1->CR1 &= ~(SPI_CR1_DFF);
   #endif
 
   // Enable the SPI peripheral.
