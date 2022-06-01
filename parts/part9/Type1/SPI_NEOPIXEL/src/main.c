@@ -124,7 +124,7 @@ uint8_t get_led_b(size_t led_num)
 // Max brightness (out of a possible 255)
 #define MAX_B (63)
 // How quickly to increment/decrement the colors.
-#define B_INC (20)
+#define B_INC (1)
 // Cycle the array of colors through a rainbow.
 // Red -> Purple -> Blue -> Teal -> Green -> Yellow -> Red
 // - If red > 0 and < max, if blue is 0, add red.
@@ -191,7 +191,7 @@ int main(void)
   // Set initial colors to 'off'.
   for (size_t i = 0; i < NUM_LEDS; ++i)
   {
-    set_color(i, get_rgb_color(0x00, 0x3F, 0x00));
+    set_color(i, get_rgb_color(0x00, 0x00, 0x00));
   }
   // Set the latching period to all 0s.
   for (size_t i = LED_BYTES - NZR_RST_PULSE; i < LED_BYTES; ++i)
@@ -370,7 +370,7 @@ int main(void)
   // Done; now just cycle between colors.
   while (1)
   {
-    // rainbow();
+    rainbow();
     delay_cycles(10000);
   }
 }
