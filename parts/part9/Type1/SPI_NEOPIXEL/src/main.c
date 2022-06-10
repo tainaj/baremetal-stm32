@@ -308,7 +308,7 @@ int main(void)
     GPIOB->AFR[0] &= ~(0xF << (5 * 4));
   #endif
 
-  // DMA configuration (channel 1).
+  // DMA configuration (channel 3).
   // CCR register:
   // - Memory-to-peripheral
   // - Circular mode enabled.

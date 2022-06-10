@@ -57,7 +57,7 @@ void clock_setup(void) {
     PWR->CR1 = 0x00000208;
     // Set 2 wait states in flash and enable the prefetch buffer.
     FLASH->ACR &= ~(FLASH_ACR_LATENCY);
-    FLASH->ACR |=  (FLASH_ACR_LATENCY_2 |
+    FLASH->ACR |=  (FLASH_ACR_LATENCY_1 |
                     FLASH_ACR_PRFTEN);
     // Configure the PLLR clock to (PLLSRC * (N / M)) / R = 64MHz.
     // Set PLLN = 0001000, PLLM = 000, PLLR = 001, and PLLSRC to 10
