@@ -11,8 +11,14 @@
 #endif
 
 // Configurable NZR settings
+#ifdef VVC_L0
+#define NZR_BIT_0 0xC0
+#define NZR_BIT_1 0xE0
+#else
 #define NZR_BIT_0 0xE0
 #define NZR_BIT_1 0xF8
+#endif
+
 #define NZR_RST_PULSE 192
 
 // Array of LED colors. G/R/B/G/R/B/...
@@ -332,6 +338,10 @@ int main(void)
   DMA1_Channel3->CPAR = ( uint32_t ) & (SPI1->DR);
   // Set DMA data transfer length (framebuffer length).
   DMA1_Channel3->CNDTR = ( uint16_t )LED_BYTES;
+  // Set DMA request mapping for SPI1_TX (L0-only)
+  #ifdef VVC_L0
+    DMA1_CSELR->CSELR = 1 << (4 * (3-1));
+  #endif
 
   // SPI1 configuration:
   // - Clock phase/polarity: 1/1
