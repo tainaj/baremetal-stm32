@@ -5,9 +5,9 @@
 #include "stm32g0xx.h"
 
 // Configurable NZR settings
-#define NZR_BIT_0       0x07
-#define NZR_BIT_1       0x1F
-#define NZR_RST_PULSE   128
+#define NZR_BIT_0       0xE0
+#define NZR_BIT_1       0xF8
+#define NZR_RST_PULSE   192
 
 // Array of LED colors. G/R/B/G/R/B/...
 #define NUM_LEDS  ( 3 )
@@ -82,7 +82,7 @@ uint8_t get_led_b( size_t led_num ) {
 // Max brightness (out of a possible 255)
 #define MAX_B ( 63 )
 // How quickly to increment/decrement the colors.
-#define B_INC ( 20 )
+#define B_INC ( 1 )
 // Cycle the array of colors through a rainbow.
 // Red -> Purple -> Blue -> Teal -> Green -> Yellow -> Red
 // - If red > 0 and < max, if blue is 0, add red.
@@ -116,7 +116,7 @@ void rainbow( void ) {
 int main(void) {
   // Set initial colors to 'off'.
   for ( size_t i = 0; i < NUM_LEDS; ++i ) {
-    set_color( i, get_rgb_color( 0x00, 0x3F, 0x00 ) );
+    set_color( i, get_rgb_color( 0x00, 0x00, 0x00 ) );
   }
   // Set the latching period to all 0s.
   for ( size_t i = LED_BYTES - NZR_RST_PULSE; i < LED_BYTES; ++i ) {
@@ -128,20 +128,21 @@ int main(void) {
   RCC->APBENR2  |= RCC_APBENR2_SPI1EN;
 
   // Setup core clock to 48MHz.
-  // Set 2 wait states in Flash.
+  // Set 2 wait states in Flash and enable the prefetch buffer.
   FLASH->ACR &= ~( FLASH_ACR_LATENCY );
-  FLASH->ACR |=  ( 2 << FLASH_ACR_LATENCY_Pos );
-  // Configure PLL; R = 2, M = 1, N = 6.
+  FLASH->ACR |=  ( FLASH_ACR_LATENCY_1 | 
+                   FLASH_ACR_PRFTEN);
+  // Configure PLL; R = 2, M = 2, N = 12.
   // freq = ( 16MHz * ( N / M ) ) / R
-  RCC->PLLCFGR &= ~( RCC_PLLCFGR_PLLR |
-                     RCC_PLLCFGR_PLLREN |
-                     RCC_PLLCFGR_PLLN |
-                     RCC_PLLCFGR_PLLM |
-                     RCC_PLLCFGR_PLLSRC );
-  RCC->PLLCFGR |=  ( 1 << RCC_PLLCFGR_PLLR_Pos |
-                     6 << RCC_PLLCFGR_PLLN_Pos |
-                     RCC_PLLCFGR_PLLREN |
-                     2 << RCC_PLLCFGR_PLLSRC_Pos );
+  // Note: PLLN cannot be 0000000!
+  RCC->PLLCFGR  &= ~(RCC_PLLCFGR_PLLR | RCC_PLLCFGR_PLLM |
+                     RCC_PLLCFGR_PLLSRC);
+  RCC->PLLCFGR  |=  (RCC_PLLCFGR_PLLSRC_HSI);
+  RCC->PLLCFGR  |=  (0x1UL  << RCC_PLLCFGR_PLLM_Pos);
+  RCC->PLLCFGR  |=  (0x0CUL << RCC_PLLCFGR_PLLN_Pos);
+  RCC->PLLCFGR  &= ~(0x73UL << RCC_PLLCFGR_PLLN_Pos);
+  RCC->PLLCFGR  |=  (0x1UL  << RCC_PLLCFGR_PLLR_Pos);
+  RCC->PLLCFGR  |=  ( RCC_PLLCFGR_PLLREN );
   // Enable and select the PLL.
   RCC->CR   |= RCC_CR_PLLON;
   while ( !( RCC->CR & RCC_CR_PLLRDY ) ) {};
@@ -161,7 +162,7 @@ int main(void) {
   // - Memory-to-peripheral
   // - Circular mode enabled.
   // - Increment memory ptr, don't increment periph ptr.
-  // - 8-bit data size for both source and destination. (change to 16-bit for dest)
+  // - 8-bit data size for both source and destination.
   // - High priority.
   DMA1_Channel1->CCR &= ~( DMA_CCR_MEM2MEM |
                            DMA_CCR_PL |
@@ -172,8 +173,7 @@ int main(void) {
   DMA1_Channel1->CCR |=  ( ( 0x2 << DMA_CCR_PL_Pos ) |
                            DMA_CCR_MINC |
                            DMA_CCR_CIRC |
-                           DMA_CCR_DIR  |
-                           DMA_CCR_PSIZE_0);
+                           DMA_CCR_DIR);
   // Route DMA channel 0 to SPI1 transmit.
   DMAMUX1_Channel0->CCR &= ~( DMAMUX_CxCR_DMAREQ_ID );
   DMAMUX1_Channel0->CCR |=  ( 17 << DMAMUX_CxCR_DMAREQ_ID_Pos );
@@ -188,8 +188,8 @@ int main(void) {
   // SPI1 configuration:
   // - Clock phase/polarity: 1/1
   // - Assert internal CS signal (software CS pin control)
-  // - MSB-first (change to LSB-first)
-  // - 8-bit frames (change to 16-bit)
+  // - MSB-first
+  // - 8-bit frames
   // - Baud rate prescaler of 8 (for a 6MHz bit-clock)
   // - TX DMA requests enabled.
   SPI1->CR1 &= ~( SPI_CR1_LSBFIRST |
@@ -199,10 +199,9 @@ int main(void) {
                   0x2 << SPI_CR1_BR_Pos |
                   SPI_CR1_MSTR |
                   SPI_CR1_CPOL |
-                  SPI_CR1_CPHA |
-                  SPI_CR1_LSBFIRST );
+                  SPI_CR1_CPHA);
   SPI1->CR2 &= ~( SPI_CR2_DS );
-  SPI1->CR2 |=  ( 0xF << SPI_CR2_DS_Pos |
+  SPI1->CR2 |=  ( 0x7 << SPI_CR2_DS_Pos |
                   SPI_CR2_TXDMAEN );
   // Enable the SPI peripheral.
   SPI1->CR1 |=  ( SPI_CR1_SPE );
@@ -212,7 +211,7 @@ int main(void) {
 
   // Done; now just cycle between colors.
   while (1) {
-    //rainbow();
+    rainbow();
     delay_cycles( 10000 );
   }
 }
