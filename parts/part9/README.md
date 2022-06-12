@@ -90,3 +90,60 @@ In my case, the fourth LED shines a bright white. This issue was resolved by cha
 
 ## Author's notes
 As the length of this post implies, there is a better way to send the NZR data to each WS2812B LED. See my upcoming original for an example implementation. (TBA)
+
+
+## For editing purposes only
+The following are some of my goals involving DMA:
+1. Complete VVC's tutorial as written.
+   * Use devices F051, F303, L031, G031. Note that this lab will skip Type 2 DMA.
+   * Note differences between them all (F0 is standard, L0 has only 8-bot or 16-bit SPI, G0 has DMAMUX)
+2. Research additional example uses/features for DMA
+   * Textbook DMA: DMA Chapter, DAC with DMA, I2C with DMA, SPI with DMA
+   * ECE362 DMA: Cyclone lights class project. DMA homework, etc. Recall your previous analysis during Part 8 bonus.
+3. Create an original project...
+   * **Strobing lights** - recall your idea you wrote during Lab 8
+4. Bonus 1: Investigate the G0's S08N package
+   * How to access Pin 4 (PA0, PA1, PA2, **PF2-NRST**)
+   * How to access Pin 8 (PB5, PB6, **PA14-BOOT0**, PA15). Note that value of BOOT0 pin during bootup is not relevant by default.
+   * Motive: Use all 8 pins in package as GPIO!
+
+Part 1: Play a Musical note
+Special notes about the devices:
+* Only F0 and F3 devices have a DAC.
+* See the highlighted circle for a schematic of what I used to connect the 8 ohm speaker. (add image...)
+  * Details: 1pF capacitor in series, between speaker and GPIO.
+
+References: summary of DMA requests for each channel:
+- F3 - See Table 78 (p. 273)
+- F0 - See Table 30 (p. 202)
+- L0 - See Figure 25 and Table 49 (p. 243). Note unique register DMA_CSELR.
+  - Note also, that the mapping is segregated with mux, controlled by CSELR. This forces only 1 request per channel.
+  - The others use OR gates, potentially accepting multiple requests per channel (is exploiting this feature a good idea?)
+- G0 - See Table 52, Sect 11.3 (p. 299)
+
+Some evidence that `DAC2_CH2` is a typo
+1. DAC section in FRM only lists 1 channel for DAC2 (only in F3)
+2. F3 manual, SYSCFG registers: Bit 14, `TIM7_DAC1_CH2_DMA_RMP` clearly pairs TIM7 to DAC1_CH2, not DAC2_CH2 (p. 247).
+   * Note that in the register table, the shorthand for the bit name is misleading, since it reads as `TIM7_DAC2_DMA_RMP` (p. 245)
+3. VS Code, stm32f303x8.h, line 9697: The macro is called `SYSCFG_CFGR1_TIM7DAC1Ch2_DMA_RMP`
+4. QED.
+
+Note the CMSIS naming conventions of DMA registers, as follows:
+* `DMA1` -> `ISR`, `IFCR`. Uses `DMA_TypeDef`
+* `DMA1_Channelx` -> `CCR`, `CNDTR`, `CPAR`, `CMAR`. Uses `DMA_Channel_TypeDef`
+* `DMA1_CSELR` -> `CSELR`
+  * Used only for L0. Uses `DMA_Request_TypeDef`
+  * In C, use the line `1 << (4 * (3-1))`. This means that CSELR option 1 (SPI1) of Channel 3 is selected, which is SPI1_TX.
+
+Special thing for G0 DMAMUX (see Sect 11.3 of G0 FRM):
+* DMAMUX Ch 0 is connected to DMA Ch 1, etc.
+* You want evidence? Go to `stm32g0xx.h`, lines 599-609. Just accept that DMAMUX = DMA-1.
+
+How many DMA channels does my device have?
+* F0 - 5
+* L0 - 7
+* F3 - 7
+* G0 - 5 DMAMUX output request channels
+
+My planned tables: One each for each project (DAC speaker, RGBLED lights, I2C OLED, TFT)
+Table layout: GPIO pin | DMA request name (ex. DAC1_CH1) | alt function no. for F0 (if eligible) | .. for L0 | .. for F3 | .. for G0
