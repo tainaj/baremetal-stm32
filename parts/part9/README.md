@@ -72,8 +72,6 @@ For the next stream, edit `grbs` to modify each LED's RGB value.
 ### Observe the waveform
 Read the input data pin (pink on the images). Shown below, the `0` bit has a high voltage time of about 500 ns, while the `1` bit has a time of around 750 ns (both within 150 ns tolerance).
 
-![Oscilloscope bit 0 and 1](1_0-and-1-bit.bmp)
-
 In `global.h`, I decided to modify `MPX_P0` to any number between 1 and 20. This is what I found:
 * 1 to 15 : `0` bit high time remained 500 ns
 * 16+ : `0` bit indistinguishable from `1` bit
@@ -147,3 +145,80 @@ How many DMA channels does my device have?
 
 My planned tables: One each for each project (DAC speaker, RGBLED lights, I2C OLED, TFT)
 Table layout: GPIO pin | DMA request name (ex. DAC1_CH1) | alt function no. for F0 (if eligible) | .. for L0 | .. for F3 | .. for G0
+
+DAC pin assignments for DAC speaker:
+
+Pin function | GPIO pin | F0                   | L0 | F3                    | G0
+-------------|----------|----------------------|----|-----------------------|--------
+DAC1_CH1     | PA4      | DAC_OUT1<sup>1</sup> | *  | DAC1_OUT1<sup>1</sup> | *
+1. Additional function (set `MODER` bits to 11)
+
+Pin assignments for RGBLED lights:
+
+Pin function | GPIO pin | F0  | L0  | F3  | G0
+-------------|----------|-----|-----|-----|--------
+SPI1_MOSI    | PB5      | AF0 | AF0 | AF5 | AF0
+
+Pin assignments for SSD1306 I2C OLED display:
+
+Pin function | GPIO pin | F0  | L0  | F3  | G0
+-------------|----------|-----|-----|-----|--------
+I2C1_SCL     | PB6      | AF1 | AF1 | AF4 | AF6
+I2C1_SDA     | PB7      | AF1 | AF1 | AF4 | AF6
+
+Pin assignments for ILI9341 TFT LCD display
+
+Pin function          | GPIO pin               | F0  | L0    | F3  | G0
+----------------------|------------------------|-----|-------|-----|----
+SPI1_SCK (SPI2_SCK)   | PB3 (PB8)              | AF0 | AF0   | AF3 | (AF1)
+SPI1_MOSI (SPI2_MOSI) | PB5 (PB10<sup>1</sup>) | AF0 | AF0   | AF3 | (AF0)
+CS                    | PA15 (PA0)             | OUT | (OUT) | OUT | (OUT)
+RESET                 | PA13 (PA1)             | OUT | (OUT) | OUT | (OUT)
+DC                    | PA11 (PA3)             | OUT | (OUT) | OUT | (OUT)
+1. Needs remapping of pin 6 with SYSCFG_CFGR1 register from PA12 to PA10
+
+The DMA channel mappings for each peripheral:
+
+DMA request | Channel # (G0 MUX input)
+------------|------------------------
+DAC1_CH1    | Ch3
+SPI1_TX     | Ch3 (17)
+SPI2_TX     | (19)
+I2C1_TX     | Ch2 (11)
+
+**Explain how you determined the settings for the waveform.**
+First off, it is not recommended to run 90 LEDs from power provided through ST-LINK connector. The lights would start flickering. 3 LEDs are sufficient to demonstrate the rainbow effect.
+Secondly, The definitions for the NZR bits '0' and '1', as provided by VVC, can be improved on. Note that L0 gets a unique setting, due to its clock only going to 32 MHz, compare to 48 MHz which the other MCUs were set.
+
+The following assumptions were made:
+- 8 bit SPI is used.
+- The SPI clock was reduced eightfold, from 48 MHz to 6 MHz (or 4 MHz, for L0)
+- This gives the sum of HIGH and LOW portions of either bit as 1333ns (2000ns).
+  - Note that the WS2812 doc has the data transfer time as 1250ns.
+  - But as we saw in Part 8, the LOW portion need not be adhered so strictly, and may exceed its expected time. I assume the WS2812 electronics interpret this overtime as the start of a RESET LOW pulse. The RESET pulse is cut short, maintaining the illusion that these are just '0' and '1' bits.
+- Also note that the reason I made the change is because I had to adhere to the 150ns tolerances of the HIGH portions of either bit value.
+
+Below are the measured lengths of each NZR bit value: expected (deviance). Note that actual measured values are slightly lower than the expected values, down to 50ns less than expected. Note that larger deviance is worse:
+
+Origin                   | '0' HIGH length (ns) | '1' HIGH length (ns)
+-------------------------|----------------------|---------------------
+Docs                     | 400                  | 800
+Vivonomicon (0xC0, 0xFC) | 333 (-66)            | 1000 (+200)
+My addition (0xE0, 0xF8) | 500 (+100)           | 833 (+33)
+L0-only     (0xC0, 0xE0) | 500 (+100)           | 750 (-50)
+
+Also of note is the length of the RESET pulse. In my case, what the doc said was the minimum length was not accurate to what I eventually measured the hard way. This issue plauged my efforts to get the lights to work. So I write this down so you don't share the same fate: (adjust the length of 0x0 padded to the end for DMA to read. (NZR_RESET)). I was able to determine the actual minimum by narrowing down in a binary fashion:
+
+Origin                   | NZR_RESET | Min RESET length (us) | Result
+-------------------------|-----------|-----------------------|---------------------
+Docs                     | N/A       | 50                    | Did not work
+Test 2                   | 192       | 260                   | Worked (use as the safe option)
+Test 3                   | 170       | 226                   | Worked (absolute minimum, dependent on device and SPI config)
+Test 4                   | 169       | 225                   | Worked, but 4 lights appeared instead of 3
+Test 5                   | 168       | 224                   | Worked, but 6 lights appeared instead of 3
+Test 6                   | 160       | 212                   | Did not work
+
+If you wish to avoid doing the testing procedure, I recommend you use the safe option. If you are time-constrained, test your own device by going down gradually.
+
+Next: Show how you calculated the correct pairing for '0' and '1' bits.
+In 6 MHz, each SPI bit transferred is 166.6ns long, to a total of 1333ns for all 8 of them. For L0 at 4 MHz, each SPI bit is 250ns long, to a total of 2000ns. Both are above the nominal 1250 total data transfer time listed in the docs.
