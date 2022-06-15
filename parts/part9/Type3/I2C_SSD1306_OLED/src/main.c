@@ -41,20 +41,20 @@ delay_cycles( uint32_t cyc ) {
  * Main program.
  */
 int main(void) {
-  // Enable peripherals: GPIOA, DMA, I2C2.
-  RCC->IOPENR   |= RCC_IOPENR_GPIOAEN;
+  // Enable peripherals: GPIOB, DMA, I2C1.
+  RCC->IOPENR   |= RCC_IOPENR_GPIOBEN;
   RCC->AHBENR   |= RCC_AHBENR_DMA1EN;
-  RCC->APBENR1  |= RCC_APBENR1_I2C2EN;
+  RCC->APBENR1  |= RCC_APBENR1_I2C1EN;
 
-  // Pin A11/12 output type: Alt. Func. #6.
-  GPIOA->MODER    &= ~( 0x3 << ( 11 * 2 ) |
-                        0x3 << ( 12 * 2 ) );
-  GPIOA->MODER    |=  ( 0x2 << ( 11 * 2 ) |
-                        0x2 << ( 12 * 2 ) );
-  GPIOA->AFR[ 1 ] &= ~( GPIO_AFRH_AFSEL11 |
-                        GPIO_AFRH_AFSEL12 );
-  GPIOA->AFR[ 1 ] |=  ( 0x6 << GPIO_AFRH_AFSEL11_Pos |
-                        0x6 << GPIO_AFRH_AFSEL12_Pos );
+  // Pin B6/7 output type: Alt. Func. #6.
+  GPIOB->MODER    &= ~( 0x3 << ( 6 * 2 ) |
+                        0x3 << ( 7 * 2 ) );
+  GPIOB->MODER    |=  ( 0x2 << ( 6 * 2 ) |
+                        0x2 << ( 7 * 2 ) );
+  GPIOB->AFR[ 0 ] &= ~( GPIO_AFRL_AFSEL6 |
+                        GPIO_AFRL_AFSEL7 );
+  GPIOB->AFR[ 0 ] |=  ( 0x6 << GPIO_AFRL_AFSEL6_Pos |
+                        0x6 << GPIO_AFRL_AFSEL7_Pos );
 
   // DMA configuration (channel 1).
   // CCR register:
@@ -73,44 +73,44 @@ int main(void) {
   DMA1_Channel1->CCR |=  ( ( 0x2 << DMA_CCR_PL_Pos ) |
                            DMA_CCR_MINC |
                            DMA_CCR_DIR );
-  // Route DMA channel 0 to I2C2 transmit.
+  // Route DMA channel 0 to I2C1 transmit.
   DMAMUX1_Channel0->CCR &= ~( DMAMUX_CxCR_DMAREQ_ID );
-  DMAMUX1_Channel0->CCR |=  ( 13 << DMAMUX_CxCR_DMAREQ_ID_Pos );
+  DMAMUX1_Channel0->CCR |=  ( 11 << DMAMUX_CxCR_DMAREQ_ID_Pos );
   // Set DMA source and destination addresses.
   // Source: Address of the initialization commands.
   DMA1_Channel1->CMAR  = ( uint32_t )&INIT_CMDS;
-  // Dest.: 'I2C2 transmit' register.
-  DMA1_Channel1->CPAR  = ( uint32_t )&( I2C2->TXDR );
+  // Dest.: 'I2C1 transmit' register.
+  DMA1_Channel1->CPAR  = ( uint32_t )&( I2C1->TXDR );
   // Set DMA data transfer length (# of init commands).
   DMA1_Channel1->CNDTR = ( uint16_t )NUM_INIT_CMDS;
   // Enable DMA1 Channel 1.
   DMA1_Channel1->CCR |= ( DMA_CCR_EN );
 
-  // I2C2 configuration:
+  // I2C1 configuration:
   // Timing register. For "Fast-Mode+" (1MHz), the RM says:
   // (@16MHz) presc=0, SCLL=4, SCLH=2, SDADEL=0, SCLDEL=2.
-  I2C2->TIMINGR  = 0x00200204;
+  I2C1->TIMINGR  = 0x00200204;
   // Enable the peripheral.
-  I2C2->CR1     |= I2C_CR1_PE;
+  I2C1->CR1     |= I2C_CR1_PE;
   // Set the device address. Usually 0x78, can be 0x7A.
   // The I2C peripheral also needs to know how many bytes
   // to send before it starts transmitting.
-  I2C2->CR2     &= ~( I2C_CR2_SADD |
+  I2C1->CR2     &= ~( I2C_CR2_SADD |
                       I2C_CR2_NBYTES );
-  I2C2->CR2     |=  ( 0x7A << I2C_CR2_SADD_Pos |
+  I2C1->CR2     |=  ( 0x7A << I2C_CR2_SADD_Pos |
                       NUM_INIT_CMDS << I2C_CR2_NBYTES_Pos );
   // Enable I2C DMA requests.
-  I2C2->CR1     |=  ( I2C_CR1_TXDMAEN );
+  I2C1->CR1     |=  ( I2C_CR1_TXDMAEN );
   // Send a start signal.
-  I2C2->CR2     |=  ( I2C_CR2_START );
+  I2C1->CR2     |=  ( I2C_CR2_START );
   // (DMA is now running.)
   // Wait for DMA to finish.
   while ( !( DMA1->ISR & DMA_ISR_TCIF1 ) ) {};
   DMA1->IFCR |= DMA_IFCR_CTCIF1;
   // Stop the I2C transmission.
-  while ( !( I2C2->ISR & I2C_ISR_TC ) ) {};
-  I2C2->CR2  |=  ( I2C_CR2_STOP );
-  while ( I2C2->ISR & I2C_ISR_BUSY ) {};
+  while ( !( I2C1->ISR & I2C_ISR_TC ) ) {};
+  I2C1->CR2  |=  ( I2C_CR2_STOP );
+  while ( I2C1->ISR & I2C_ISR_BUSY ) {};
 
   // Reconfigure DMA and I2C for sending the framebuffer.
   // Disable the DMA channel.
@@ -118,26 +118,26 @@ int main(void) {
   // Set DMA circular mode.
   DMA1_Channel1->CCR |=  ( DMA_CCR_CIRC );
   // Set I2C autoreload and the maximum 255 byte length.
-  I2C2->CR2      &= ~( I2C_CR2_NBYTES );
-  I2C2->CR2      |=  ( I2C_CR2_RELOAD |
+  I2C1->CR2      &= ~( I2C_CR2_NBYTES );
+  I2C1->CR2      |=  ( I2C_CR2_RELOAD |
                        255 << I2C_CR2_NBYTES_Pos );
-  // Enable the I2C2 interrupt.
-  NVIC_SetPriority( I2C2_IRQn, 0x03 );
-  NVIC_EnableIRQ( I2C2_IRQn );
+  // Enable the I2C1 interrupt.
+  NVIC_SetPriority( I2C1_IRQn, 0x03 );
+  NVIC_EnableIRQ( I2C1_IRQn );
   // Enable the 'transfer complete' I2C interrupt.
-  I2C2->CR1      |= I2C_CR1_TCIE;
+  I2C1->CR1      |= I2C_CR1_TCIE;
   // Update DMA source/destination/size registers.
   // Source: Address of the framebuffer.
   DMA1_Channel1->CMAR  = ( uint32_t )&FRAMEBUFFER;
-  // Dest.: 'I2C2 transmit' register.
-  DMA1_Channel1->CPAR  = ( uint32_t )&( I2C2->TXDR );
+  // Dest.: 'I2C1 transmit' register.
+  DMA1_Channel1->CPAR  = ( uint32_t )&( I2C1->TXDR );
   // Set DMA data transfer length (framebuffer length).
   DMA1_Channel1->CNDTR = ( uint16_t )SSD1306_A;
   // Send a start signal.
-  I2C2->CR2     |=  ( I2C_CR2_START );
-  while ( !( I2C2->CR2 & I2C_CR2_START ) ) {};
+  I2C1->CR2     |=  ( I2C_CR2_START );
+  while ( !( I2C1->CR2 & I2C_CR2_START ) ) {};
   // Send '0x40' to indicate display data.
-  I2C2->TXDR = 0x40;
+  I2C1->TXDR = 0x40;
   // Re-enable DMA1 Channel 1.
   DMA1_Channel1->CCR |= ( DMA_CCR_EN );
 
@@ -160,10 +160,10 @@ int main(void) {
   }
 }
 
-// I2C2 interrupt handler.
-void I2C2_IRQ_handler( void ) {
-  if ( I2C2->ISR & I2C_ISR_TCR ) {
-    I2C2->CR2 &= ~( I2C_CR2_NBYTES );
-    I2C2->CR2 |=  ( 255 << I2C_CR2_NBYTES_Pos );
+// I2C1 interrupt handler.
+void I2C1_IRQ_handler( void ) {
+  if ( I2C1->ISR & I2C_ISR_TCR ) {
+    I2C1->CR2 &= ~( I2C_CR2_NBYTES );
+    I2C1->CR2 |=  ( 255 << I2C_CR2_NBYTES_Pos );
   }
 }
