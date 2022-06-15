@@ -340,7 +340,7 @@ int main(void)
   DMA1_Channel3->CNDTR = ( uint16_t )LED_BYTES;
   // Set DMA request mapping for SPI1_TX (L0-only)
   #ifdef VVC_L0
-    DMA1_CSELR->CSELR = 1 << (4 * (3-1));
+    DMA1_CSELR->CSELR = 0x1 << (4 * (3-1));
   #endif
 
   // SPI1 configuration:

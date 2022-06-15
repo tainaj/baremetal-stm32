@@ -2,7 +2,22 @@
 #include <stdint.h>
 #include <stdlib.h>
 // Vendor-provided device header file.
-#include "stm32g0xx.h"
+#ifdef VVC_F0
+#include "stm32f0xx.h"
+#elif VVC_F3
+#include "stm32f3xx.h"
+#elif VVC_L0
+#include "stm32l0xx.h"
+#endif
+
+// Alt. Func. #
+#ifdef VVC_F0
+#define ALT_NO 1
+#elif VVC_F3
+#define ALT_NO 4
+#elif VVC_L0
+#define ALT_NO 1
+#endif
 
 // 128x64-pixel monochrome framebuffer.
 #define SSD1306_W 128
@@ -42,55 +57,147 @@ delay_cycles( uint32_t cyc ) {
  */
 int main(void) {
   // Enable peripherals: GPIOB, DMA, I2C1, SYSCFG.
-  RCC->IOPENR   |= RCC_IOPENR_GPIOBEN;
+  #ifdef VVC_F0
+    RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+  #elif VVC_F3
+    RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+  #elif VVC_L0
+    RCC->IOPENR |= RCC_IOPENR_GPIOBEN;
+  #endif
   RCC->AHBENR   |= RCC_AHBENR_DMA1EN;
-  RCC->APBENR1  |= RCC_APBENR1_I2C1EN;
-  RCC->APBENR2  |= RCC_APBENR2_SYSCFGEN;
+  RCC->APB1ENR  |= RCC_APB1ENR_I2C1EN;
+  RCC->APB2ENR  |= RCC_APB2ENR_SYSCFGEN;
 
-  // Pin B6/7 output type: Alt. Func. #6.
+  // Setup core clock to 16MHz.
+  #ifdef VVC_F0
+    // Reset the Flash 'Access Control Register', and
+    // then set 0 wait-states (default).
+    FLASH->ACR &= ~(0x00000017);
+    // Configure the PLL to (HSI / 2) * 4 = 16MHz.
+    // Use a PLLMUL of 0x2 for *4, and keep PLLSRC at 0
+    // to use (HSI / PREDIV) as the core source. HSI = 8MHz.
+    RCC->CFGR &= ~(RCC_CFGR_PLLMUL |
+                  RCC_CFGR_PLLSRC);
+    RCC->CFGR |= (RCC_CFGR_PLLSRC_HSI_DIV2 |
+                  RCC_CFGR_PLLMUL4);
+    // Turn the PLL on and wait for it to be ready.
+    RCC->CR |= (RCC_CR_PLLON);
+    while (!(RCC->CR & RCC_CR_PLLRDY))
+    {
+    };
+    // Select the PLL as the system clock source.
+    RCC->CFGR &= ~(RCC_CFGR_SW);
+    RCC->CFGR |= (RCC_CFGR_SW_PLL);
+    while (!(RCC->CFGR & RCC_CFGR_SWS_PLL))
+    {
+    };
+    // The system clock is now 16MHz.
+    SystemCoreClock = 16000000;
+  #elif VVC_F3
+    // Set 0 wait-states (default) and enable the prefetch buffer.
+    FLASH->ACR |= (FLASH_ACR_PRFTBE);
+    // Configure the PLL to (HSI / 2) * 4 = 16MHz.
+    // Use a PLLMUL of 0x2 for *4, and keep PLLSRC at 0
+    // to use (HSI / PREDIV) as the core source. HSI = 8MHz.
+    RCC->CFGR &= ~(RCC_CFGR_PLLMUL |
+                  RCC_CFGR_PLLSRC);
+    RCC->CFGR |= (RCC_CFGR_PLLSRC_HSI_DIV2 |
+                  RCC_CFGR_PLLMUL4);
+    // Turn the PLL on and wait for it to be ready.
+    RCC->CR |= (RCC_CR_PLLON);
+    while (!(RCC->CR & RCC_CR_PLLRDY))
+    {
+    };
+    // Select the PLL as the system clock source.
+    RCC->CFGR &= ~(RCC_CFGR_SW);
+    RCC->CFGR |= (RCC_CFGR_SW_PLL);
+    while (!(RCC->CFGR & RCC_CFGR_SWS_PLL))
+    {
+    };
+    // The system clock is now 16MHz.
+    SystemCoreClock = 16000000;
+  #elif VVC_L0
+    // Set voltage scaling range to Range 2 (default)
+    // Note: VOS cannot be 00!
+    PWR->CR = 0x00001000;
+    // Set the Flash ACR to use 1 wait-state
+    // and enable the prefetch buffer and pre-read.
+    FLASH->ACR |=  (FLASH_ACR_LATENCY |
+                    FLASH_ACR_PRFTEN |
+                    FLASH_ACR_PRE_READ);
+    // Enable the HSI oscillator, since the L0 series boots
+    // to the MSI one.
+    RCC->CR    |=  (RCC_CR_HSION);
+    while (!(RCC->CR & RCC_CR_HSIRDY)) {};
+    // Select the HSI16 as the system clock source.
+    RCC->CFGR  &= ~(RCC_CFGR_SW);
+    RCC->CFGR  |=  (RCC_CFGR_SW_HSI);
+    while (!(RCC->CFGR & RCC_CFGR_SWS_HSI)) {};
+    // Set the global clock speed variable.
+    SystemCoreClock = 16000000;
+  #endif
+
+  // Pin B6/7 output type: Alt. Func. #.
   GPIOB->MODER    &= ~( 0x3 << ( 6 * 2 ) |
                         0x3 << ( 7 * 2 ) );
   GPIOB->MODER    |=  ( 0x2 << ( 6 * 2 ) |
                         0x2 << ( 7 * 2 ) );
   GPIOB->AFR[ 0 ] &= ~( GPIO_AFRL_AFSEL6 |
                         GPIO_AFRL_AFSEL7 );
-  GPIOB->AFR[ 0 ] |=  ( 0x6 << GPIO_AFRL_AFSEL6_Pos |
-                        0x6 << GPIO_AFRL_AFSEL7_Pos );
+  GPIOB->AFR[ 0 ] |=  ( ALT_NO << GPIO_AFRL_AFSEL6_Pos |
+                        ALT_NO << GPIO_AFRL_AFSEL7_Pos );
 
   // Enable the high sink driver capability by
-  // setting I2C_PBx_FM+ bit in SYSCFG_CFGR1
-  SYSCFG->CFGR1 |= (SYSCFG_CFGR1_I2C_PB6_FMP |
-                    SYSCFG_CFGR1_I2C_PB7_FMP);
+  // setting I2C_PBx_FM+ bit in SYSCFG_CFGRy
+  #ifdef VVC_F0
+    SYSCFG->CFGR1 |= (SYSCFG_CFGR1_I2C_FMP_PB6 |
+                      SYSCFG_CFGR1_I2C_FMP_PB7);
+  #elif VVC_L0
+    SYSCFG->CFGR2 |= (SYSCFG_CFGR2_I2C_PB6_FMP |
+                      SYSCFG_CFGR2_I2C_PB7_FMP);
+  #else
+    SYSCFG->CFGR1 |= (SYSCFG_CFGR1_I2C_PB6_FMP |
+                      SYSCFG_CFGR1_I2C_PB7_FMP);
+  #endif
 
-  // DMA configuration (channel 1).
+  // Set the 'I2C1_TX DMA remap' bit in SYSCFG_CFGR3,
+  // so that I2C1_TX maps to DMA1_Ch2 instead of DMA1_Ch6 (default).
+  // (Not all STM32F303 chips have a DMA2 peripheral)
+  #ifdef VVC_F3
+    SYSCFG->CFGR3 &= ~(SYSCFG_CFGR3_I2C1_TX_DMA_RMP);
+    SYSCFG->CFGR3 |=  (SYSCFG_CFGR3_I2C1_TX_DMA_RMP_0);
+  #endif
+
+  // DMA configuration (channel 2).
   // CCR register:
   // - Memory-to-peripheral
   // - Circular mode disabled.
   // - Increment memory ptr, don't increment periph ptr.
   // - 8-bit data size for both source and destination.
   // - High priority.
-  DMA1_Channel1->CCR &= ~( DMA_CCR_MEM2MEM |
+  DMA1_Channel2->CCR &= ~( DMA_CCR_MEM2MEM |
                            DMA_CCR_PL |
                            DMA_CCR_MSIZE |
                            DMA_CCR_PSIZE |
                            DMA_CCR_PINC |
                            DMA_CCR_CIRC |
                            DMA_CCR_EN );
-  DMA1_Channel1->CCR |=  ( ( 0x2 << DMA_CCR_PL_Pos ) |
+  DMA1_Channel2->CCR |=  ( ( 0x2 << DMA_CCR_PL_Pos ) |
                            DMA_CCR_MINC |
                            DMA_CCR_DIR );
-  // Route DMA channel 0 to I2C1 transmit.
-  DMAMUX1_Channel0->CCR &= ~( DMAMUX_CxCR_DMAREQ_ID );
-  DMAMUX1_Channel0->CCR |=  ( 11 << DMAMUX_CxCR_DMAREQ_ID_Pos );
   // Set DMA source and destination addresses.
   // Source: Address of the initialization commands.
-  DMA1_Channel1->CMAR  = ( uint32_t )&INIT_CMDS;
+  DMA1_Channel2->CMAR  = ( uint32_t )&INIT_CMDS;
   // Dest.: 'I2C1 transmit' register.
-  DMA1_Channel1->CPAR  = ( uint32_t )&( I2C1->TXDR );
+  DMA1_Channel2->CPAR  = ( uint32_t )&( I2C1->TXDR );
   // Set DMA data transfer length (# of init commands).
-  DMA1_Channel1->CNDTR = ( uint16_t )NUM_INIT_CMDS;
+  DMA1_Channel2->CNDTR = ( uint16_t )NUM_INIT_CMDS;
   // Enable DMA1 Channel 1.
-  DMA1_Channel1->CCR |= ( DMA_CCR_EN );
+  DMA1_Channel2->CCR |= ( DMA_CCR_EN );
+  // Set DMA request mapping for I2C1_TX (L0-only)
+  #ifdef VVC_L0
+    DMA1_CSELR->CSELR = 0x6 << (4 * (2-1));
+  #endif
 
   // I2C1 configuration:
   // Timing register. For "Fast-Mode+" (1MHz), the RM says:
