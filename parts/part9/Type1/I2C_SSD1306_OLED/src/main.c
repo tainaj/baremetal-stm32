@@ -71,28 +71,28 @@ int main(void) {
   // Setup core clock to 16MHz.
   #ifdef VVC_F0
     // Reset the Flash 'Access Control Register', and
-    // then set 0 wait-states (default).
-    FLASH->ACR &= ~(0x00000017);
-    // Configure the PLL to (HSI / 2) * 4 = 16MHz.
-    // Use a PLLMUL of 0x2 for *4, and keep PLLSRC at 0
-    // to use (HSI / PREDIV) as the core source. HSI = 8MHz.
-    RCC->CFGR &= ~(RCC_CFGR_PLLMUL |
-                  RCC_CFGR_PLLSRC);
-    RCC->CFGR |= (RCC_CFGR_PLLSRC_HSI_DIV2 |
-                  RCC_CFGR_PLLMUL4);
-    // Turn the PLL on and wait for it to be ready.
-    RCC->CR |= (RCC_CR_PLLON);
-    while (!(RCC->CR & RCC_CR_PLLRDY))
-    {
-    };
-    // Select the PLL as the system clock source.
-    RCC->CFGR &= ~(RCC_CFGR_SW);
-    RCC->CFGR |= (RCC_CFGR_SW_PLL);
-    while (!(RCC->CFGR & RCC_CFGR_SWS_PLL))
-    {
-    };
-    // The system clock is now 16MHz.
-    SystemCoreClock = 16000000;
+    // // then set 0 wait-states (default).
+    // FLASH->ACR &= ~(0x00000017);
+    // // Configure the PLL to (HSI / 2) * 4 = 16MHz.
+    // // Use a PLLMUL of 0x2 for *4, and keep PLLSRC at 0
+    // // to use (HSI / PREDIV) as the core source. HSI = 8MHz.
+    // RCC->CFGR &= ~(RCC_CFGR_PLLMUL |
+    //               RCC_CFGR_PLLSRC);
+    // RCC->CFGR |= (RCC_CFGR_PLLSRC_HSI_DIV2 |
+    //               RCC_CFGR_PLLMUL4);
+    // // Turn the PLL on and wait for it to be ready.
+    // RCC->CR |= (RCC_CR_PLLON);
+    // while (!(RCC->CR & RCC_CR_PLLRDY))
+    // {
+    // };
+    // // Select the PLL as the system clock source.
+    // RCC->CFGR &= ~(RCC_CFGR_SW);
+    // RCC->CFGR |= (RCC_CFGR_SW_PLL);
+    // while (!(RCC->CFGR & RCC_CFGR_SWS_PLL))
+    // {
+    // };
+    // // The system clock is now 16MHz.
+    // SystemCoreClock = 16000000;
   #elif VVC_F3
     // Set 0 wait-states (default) and enable the prefetch buffer.
     FLASH->ACR |= (FLASH_ACR_PRFTBE);
@@ -137,28 +137,36 @@ int main(void) {
     SystemCoreClock = 16000000;
   #endif
 
-  // Pin B6/7 output type: Alt. Func. #.
+  // Pin B6/7 set to 'alt' mode, open-drain, with pull-up.
   GPIOB->MODER    &= ~( 0x3 << ( 6 * 2 ) |
                         0x3 << ( 7 * 2 ) );
   GPIOB->MODER    |=  ( 0x2 << ( 6 * 2 ) |
                         0x2 << ( 7 * 2 ) );
-  GPIOB->AFR[ 0 ] &= ~( GPIO_AFRL_AFSEL6 |
-                        GPIO_AFRL_AFSEL7 );
-  GPIOB->AFR[ 0 ] |=  ( ALT_NO << GPIO_AFRL_AFSEL6_Pos |
-                        ALT_NO << GPIO_AFRL_AFSEL7_Pos );
+  GPIOB->AFR[ 0 ] &= ~( 0xF << ( 6 * 4 ) |
+                        0xF << ( 7 * 4 ) );
+  GPIOB->AFR[ 0 ] |=  ( ALT_NO << ( 6 * 4 ) |
+                        ALT_NO << ( 7 * 4 ) );
+  GPIOB->PUPDR    &= ~( 0x3 << ( 6 * 2 ) |
+                        0x3 << ( 7 * 2 ) );
+  GPIOB->OSPEEDR  |=  ( 0x3 << ( 6 * 2 ) |
+                        0x3 << ( 7 * 2 ) );
+  // GPIOB->PUPDR    |=  ( 0x1 << ( 6 * 2 ) |
+  //                       0x1 << ( 7 * 2 ) );
+  GPIOB->OTYPER   |=  ( 0x1 << 6 |
+                        0x1 << 7 );
 
   // Enable the high sink driver capability by
   // setting I2C_PBx_FM+ bit in SYSCFG_CFGRy
-  #ifdef VVC_F0
-    SYSCFG->CFGR1 |= (SYSCFG_CFGR1_I2C_FMP_PB6 |
-                      SYSCFG_CFGR1_I2C_FMP_PB7);
-  #elif VVC_L0
-    SYSCFG->CFGR2 |= (SYSCFG_CFGR2_I2C_PB6_FMP |
-                      SYSCFG_CFGR2_I2C_PB7_FMP);
-  #else
-    SYSCFG->CFGR1 |= (SYSCFG_CFGR1_I2C_PB6_FMP |
-                      SYSCFG_CFGR1_I2C_PB7_FMP);
-  #endif
+  // #ifdef VVC_F0
+  //   SYSCFG->CFGR1 |= (SYSCFG_CFGR1_I2C_FMP_PB6 |
+  //                     SYSCFG_CFGR1_I2C_FMP_PB7);
+  // #elif VVC_L0
+  //   SYSCFG->CFGR2 |= (SYSCFG_CFGR2_I2C_PB6_FMP |
+  //                     SYSCFG_CFGR2_I2C_PB7_FMP);
+  // #else
+  //   SYSCFG->CFGR1 |= (SYSCFG_CFGR1_I2C_PB6_FMP |
+  //                     SYSCFG_CFGR1_I2C_PB7_FMP);
+  // #endif
 
   // Set the 'I2C1_TX DMA remap' bit in SYSCFG_CFGR3,
   // so that I2C1_TX maps to DMA1_Ch2 instead of DMA1_Ch6 (default).
@@ -192,17 +200,20 @@ int main(void) {
   DMA1_Channel2->CPAR  = ( uint32_t )&( I2C1->TXDR );
   // Set DMA data transfer length (# of init commands).
   DMA1_Channel2->CNDTR = ( uint16_t )NUM_INIT_CMDS;
-  // Enable DMA1 Channel 1.
-  DMA1_Channel2->CCR |= ( DMA_CCR_EN );
   // Set DMA request mapping for I2C1_TX (L0-only)
   #ifdef VVC_L0
     DMA1_CSELR->CSELR = 0x6 << (4 * (2-1));
   #endif
+  // Enable DMA1 Channel 1.
+  DMA1_Channel2->CCR |= ( DMA_CCR_EN );
 
   // I2C1 configuration:
   // Timing register. For "Fast-Mode+" (1MHz), the RM says:
   // (@16MHz) presc=0, SCLL=4, SCLH=2, SDADEL=0, SCLDEL=2.
-  I2C1->TIMINGR  = 0x00200204;
+  // I2C1->TIMINGR  = 0x00200204;
+  I2C1->CR1     &= ~I2C_CR1_PE;
+  //I2C1->TIMINGR  = 0x30420F13; // Std mode (100kHz @ 16MHz)
+  I2C1->TIMINGR  = 0x50100103; // Std mode (100kHz @ 8MHz)
   // Enable the peripheral.
   I2C1->CR1     |= I2C_CR1_PE;
   // Set the device address. Usually 0x78, can be 0x7A.
@@ -214,6 +225,7 @@ int main(void) {
                       NUM_INIT_CMDS << I2C_CR2_NBYTES_Pos );
   // Enable I2C DMA requests.
   I2C1->CR1     |=  ( I2C_CR1_TXDMAEN );
+  I2C1->CR1     |=  ( I2C_CR1_PE);
   // Send a start signal.
   I2C1->CR2     |=  ( I2C_CR2_START );
   // (DMA is now running.)
@@ -227,9 +239,9 @@ int main(void) {
 
   // Reconfigure DMA and I2C for sending the framebuffer.
   // Disable the DMA channel.
-  DMA1_Channel1->CCR &= ~( DMA_CCR_EN );
+  DMA1_Channel2->CCR &= ~( DMA_CCR_EN );
   // Set DMA circular mode.
-  DMA1_Channel1->CCR |=  ( DMA_CCR_CIRC );
+  DMA1_Channel2->CCR |=  ( DMA_CCR_CIRC );
   // Set I2C autoreload and the maximum 255 byte length.
   I2C1->CR2      &= ~( I2C_CR2_NBYTES );
   I2C1->CR2      |=  ( I2C_CR2_RELOAD |
@@ -241,18 +253,18 @@ int main(void) {
   I2C1->CR1      |= I2C_CR1_TCIE;
   // Update DMA source/destination/size registers.
   // Source: Address of the framebuffer.
-  DMA1_Channel1->CMAR  = ( uint32_t )&FRAMEBUFFER;
+  DMA1_Channel2->CMAR  = ( uint32_t )&FRAMEBUFFER;
   // Dest.: 'I2C1 transmit' register.
-  DMA1_Channel1->CPAR  = ( uint32_t )&( I2C1->TXDR );
+  DMA1_Channel2->CPAR  = ( uint32_t )&( I2C1->TXDR );
   // Set DMA data transfer length (framebuffer length).
-  DMA1_Channel1->CNDTR = ( uint16_t )SSD1306_A;
+  DMA1_Channel2->CNDTR = ( uint16_t )SSD1306_A;
   // Send a start signal.
   I2C1->CR2     |=  ( I2C_CR2_START );
   while ( !( I2C1->CR2 & I2C_CR2_START ) ) {};
   // Send '0x40' to indicate display data.
   I2C1->TXDR = 0x40;
   // Re-enable DMA1 Channel 1.
-  DMA1_Channel1->CCR |= ( DMA_CCR_EN );
+  DMA1_Channel2->CCR |= ( DMA_CCR_EN );
 
   // Done; now draw patterns to the framebuffer.
   // The display is configured to hold 8 vertical pixels in
